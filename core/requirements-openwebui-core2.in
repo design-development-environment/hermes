@@ -1,0 +1,4 @@
+open-webui==0.12.5
+torch==2.15.0+cpu
+# NumPy 2.3+ wheels require x86-64-v2; 2.2.6 retains an SSE3 baseline.
+numpy==2.2.6

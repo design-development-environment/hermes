@@ -1,0 +1,13 @@
+open-webui==0.12.5
+fastapi
+uvicorn
+pillow
+pywin32
+pywinauto
+pyautogui
+pyperclip
+psutil
+send2trash
+plyer
+python-dotenv
+websockets

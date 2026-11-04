@@ -1,0 +1,12 @@
+open-webui==0.12.5
+fastapi
+uvicorn
+pillow
+psutil
+send2trash
+pyperclip
+python-dotenv
+websockets
+pyobjc-framework-Cocoa
+pyobjc-framework-Quartz
+pyobjc-framework-ApplicationServices

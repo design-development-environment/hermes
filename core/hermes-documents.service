@@ -1,0 +1,16 @@
+[Unit]
+Description=Hermes document workflow API
+After=graphical-session.target
+StartLimitIntervalSec=300
+StartLimitBurst=20
+
+[Service]
+Type=simple
+WorkingDirectory=%h/hermes-v4
+Environment=HERMES_ROOT=%h/hermes-v4
+ExecStart=/bin/bash -c 'export HERMES_TOOL_TOKEN="$(<%h/.config/hermes/tool-token)"; exec %h/hermes-v4/.venv/bin/uvicorn hermes_tools:app --host 127.0.0.1 --port 8766'
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

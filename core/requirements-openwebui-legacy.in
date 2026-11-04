@@ -1,0 +1,4 @@
+-r requirements-openwebui.in
+# NumPy 2.5 wheels require x86-64-v2. Core 2 Duo CPUs require the
+# x86-64 baseline wheel supplied by this last compatible release.
+numpy==1.26.4

@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+case "${1:-}" in
+  enable|disable) ;;
+  *) exit 2 ;;
+esac
+login_user="${2:-}"
+if ! id "$login_user" >/dev/null 2>&1; then exit 2; fi
+if [ ! -d /etc/lightdm/lightdm.conf.d ]; then
+  echo 'LightDM is not installed; automatic login is unavailable.' >&2
+  exit 1
+fi
+config_file=/etc/lightdm/lightdm.conf.d/90-hermes-autologin.conf
+if [ "$1" = enable ]; then
+  printf '[Seat:*]\nautologin-user=%s\nautologin-user-timeout=0\n' "$login_user" > "$config_file"
+else
+  rm -f -- "$config_file"
+fi

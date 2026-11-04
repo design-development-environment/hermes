@@ -1,0 +1,11 @@
+[Unit]
+Description=Create an owner-only local Hermes backup
+After=open-webui.service hermes-action-bridge.service
+
+[Service]
+Type=oneshot
+UMask=0077
+WorkingDirectory=%h/hermes-v4
+Environment=HERMES_ROOT=%h/hermes-v4
+ExecStart=%h/hermes-v4/.venv/bin/python %h/hermes-v4/backup_manager.py
+TimeoutStartSec=180

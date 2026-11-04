@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Hermes
+Comment=Highly Efficient Real-time Machine for Everyday Support
+Exec=/usr/bin/hermes-setup
+Icon=hermes
+Terminal=false
+Categories=Utility;Network;

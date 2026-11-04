@@ -1,0 +1,113 @@
+name: Build Hermes previews
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.arch }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Python syntax and repository hygiene
+        run: |
+          python -m compileall -q core packaging tools
+          python tools/repo_check.py
+      - name: Run shared core regressions
+        run: |
+          python -m pip install -r core/requirements-hermes.lock httpx2==2.16.0
+          python -m unittest discover -s core -p 'test_*.py' -q
+      - name: Build Debian package
+        run: python packaging/build_deb.py --architecture ${{ matrix.arch }} --output dist/Hermes-linux-${{ matrix.arch }}.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hermes-linux-${{ matrix.arch }}
+          path: dist/Hermes-linux-${{ matrix.arch }}.deb
+          if-no-files-found: error
+
+  windows-preview:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y nsis
+      - name: Prepare isolated build tree
+        run: python tools/assemble.py windows dist/windows
+      - name: Run Windows overlay regressions on Linux
+        run: |
+          python -m pip install -r core/requirements-hermes.lock httpx2==2.16.0
+          python -m unittest discover -s dist/windows -p 'test_*.py' -q
+      - name: Fetch official Python bootstrap and Windows Pillow wheel
+        run: |
+          mkdir -p dist/windows/build-tools
+          curl --fail --location --retry 3 --proto '=https' --tlsv1.2 -o dist/windows/build-tools/python-3.12.10-amd64.exe https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe
+          python -m pip download --no-deps --only-binary=:all: --platform win_amd64 --python-version 312 --implementation cp --abi cp312 --dest dist/windows/build-tools Pillow==12.0.0
+      - name: Build Windows preview
+        run: python dist/windows/build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hermes-windows-preview
+          path: dist/windows/Hermes-Windows-Setup.exe
+          if-no-files-found: error
+
+  macos-preview:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare isolated build tree
+        run: python tools/assemble.py macos dist/macos
+      - name: Run Mac overlay regressions
+        run: |
+          python -m pip install -r core/requirements-hermes.lock httpx2==2.16.0
+          python -m unittest discover -s dist/macos -p 'test_*.py' -q
+      - name: Install packaging library
+        run: python -m pip install Pillow==12.0.0
+      - name: Build macOS preview app
+        run: python dist/macos/build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hermes-macos-preview
+          path: dist/macos/Hermes-macOS-Preview.zip
+          if-no-files-found: error
+
+  draft-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, windows-preview, macos-preview]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Create draft prerelease for manual review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-assets/* --draft --prerelease --title "Hermes $GITHUB_REF_NAME (preview)" --notes "Preview artifacts. Windows and macOS require native acceptance testing before use."

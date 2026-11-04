@@ -1,0 +1,26 @@
+[Unit]
+Description=Hermes Open WebUI
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=20
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/hermes/open-webui-data
+Environment=DATA_DIR=%h/.local/share/hermes/open-webui-data
+Environment=ENABLE_OLLAMA_API=false
+Environment=MALLOC_ARENA_MAX=2
+Environment=OMP_NUM_THREADS=2
+Environment=OPENBLAS_NUM_THREADS=2
+Environment=MKL_NUM_THREADS=2
+Environment=NUMEXPR_NUM_THREADS=2
+Environment=TOKENIZERS_PARALLELISM=false
+ExecStart=%h/.local/share/hermes/open-webui-venv/bin/open-webui serve --host 127.0.0.1 --port 3000
+Restart=always
+RestartSec=5
+TimeoutStartSec=180
+TasksMax=256
+
+[Install]
+WantedBy=default.target

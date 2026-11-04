@@ -1,0 +1,47 @@
+# Reviewed package manifest for the future generic Linux Mint amd64 installer.
+# This is a manifest only; it is not executed automatically.
+
+# Core runtime and isolation
+ca-certificates
+curl
+python3
+python3-venv
+python3-pip
+bubblewrap
+dbus-user-session
+libglib2.0-bin
+xdg-utils
+
+# Cinnamon/XFCE/X11 interaction
+wmctrl
+xdotool
+xclip
+xsel
+x11-xserver-utils
+libnotify-bin
+gnome-screenshot
+scrot
+
+# Audio and media
+pipewire-audio
+pulseaudio-utils
+playerctl
+ffmpeg
+
+# GPU drivers are intentionally excluded. The owner installs the correct
+# Intel/AMD/NVIDIA driver before Hermes; Hermes only verifies it at runtime.
+
+# Development and diagnostics
+git
+ripgrep
+jq
+build-essential
+nodejs
+npm
+inxi
+pciutils
+usbutils
+lshw
+smartmontools
+lm-sensors
+ethtool

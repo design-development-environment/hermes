@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Hermes Setup
+Comment=Install, configure and repair Hermes
+Exec=/usr/bin/hermes-setup
+Icon=hermes
+Terminal=false
+Categories=Utility;Settings;
