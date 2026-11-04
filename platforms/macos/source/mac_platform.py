@@ -37,7 +37,8 @@ def xdg_user_directory(name):
     return Path.home()/({'DOWNLOAD':'Downloads','VIDEOS':'Movies'}.get(name,name.title()))
 
 def writable_roots():
-    return tuple(xdg_user_directory(n) for n in ('DESKTOP','DOCUMENTS','DOWNLOAD','PICTURES','MUSIC','VIDEOS'))+(PROJECT_ROOT,)
+    # macOS temporary paths can traverse /var -> /private/var; compare canonical paths.
+    return tuple(xdg_user_directory(n).expanduser().resolve() for n in ('DESKTOP','DOCUMENTS','DOWNLOAD','PICTURES','MUSIC','VIDEOS'))+(PROJECT_ROOT.resolve(),)
 
 def openwebui_data_dir(): return DATA_DIR/'open-webui'
 def screenshot_backend(environ=None): return 'macOS screencapture'

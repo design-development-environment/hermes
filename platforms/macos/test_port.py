@@ -44,6 +44,17 @@ class PortTests(unittest.TestCase):
         self.assertEqual(r.status_code,403,r.text)
         self.assertFalse((BASE/'outside.txt').exists())
 
+    def test_writable_roots_resolve_directory_aliases(self):
+        alias=BASE/'documents-alias'
+        alias.symlink_to(BASE/'DOCUMENTS', target_is_directory=True)
+        original=mac_platform.xdg_user_directory
+        try:
+            mac_platform.xdg_user_directory=lambda name: alias
+            self.assertEqual(mac_platform.writable_roots()[0],(BASE/'DOCUMENTS').resolve())
+        finally:
+            mac_platform.xdg_user_directory=original
+            alias.unlink()
+
     def test_terminal_requires_consent(self):
         r=self.client.post('/computer/terminal/run',headers=self.headers,json={'program':'python','cwd':str(BASE/'DOCUMENTS')})
         self.assertEqual(r.status_code,403,r.text)
