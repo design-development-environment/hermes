@@ -21,7 +21,7 @@ The generic amd64 Mint Cinnamon/XFCE desktop design is documented in
 - `openwebui_tool.py`: all Hermes functions offered to the model.
 - `agent_control.py`: persistent goals, missions, approvals, routines, timeline,
   explicit workspace context, operator preferences, skills, and command center.
-- `model_instructions.txt`: concise smart-routing and safety instructions for Hermes Alpha.
+- `model_instructions.txt`: concise V8 personal-agent routing and safety instructions.
 - `sync_openwebui_tool.py`: publishes both files into Open WebUI.
 - `platform_support.py`: distribution, architecture, session, browser, localized
   folder, and capability detection shared by the services.
