@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 TEMP=tempfile.TemporaryDirectory(prefix='hermes-macos-test-')
@@ -66,7 +67,10 @@ class PortTests(unittest.TestCase):
 
     def test_backup(self):
         result=backup_manager.create_backup()
-        self.assertTrue(list(backup_manager.BACKUP_DIR.glob('*.zip')),result)
+        archive=Path(result['path'])
+        self.assertTrue(archive.is_file(),result)
+        with zipfile.ZipFile(archive) as package:
+            self.assertIn('data/agent.db',package.namelist())
 
     def test_clipboard_confirmation(self):
         r=self.client.post('/graphical/clipboard/read',headers=self.headers,json={})
@@ -75,8 +79,14 @@ class PortTests(unittest.TestCase):
     def test_tool_schemas(self):
         import sync_openwebui_tool
         specs=sync_openwebui_tool.generated_specs()
-        self.assertGreaterEqual(len(specs),90)
+        self.assertGreaterEqual(len(specs),122)
         self.assertEqual(len({s['name'] for s in specs}),len(specs))
+        self.assertIn('get_personal_command_center',{s['name'] for s in specs})
+
+    def test_v8_agent_command_center(self):
+        r=self.client.get('/agent/command-center',headers=self.headers)
+        self.assertEqual(r.status_code,200,r.text)
+        self.assertEqual(r.json()['safety_mode'],'normal')
 
 if __name__=='__main__':
     unittest.main(verbosity=2)

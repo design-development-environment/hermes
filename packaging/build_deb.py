@@ -14,6 +14,7 @@ from pathlib import Path
 
 PACKAGING = Path(__file__).resolve().parent
 SOURCE = PACKAGING.parent / 'core'
+VERSION = (PACKAGING.parent / 'VERSION').read_text(encoding='utf-8').strip()
 DESKTOP = Path.home() / 'Desktop'
 FILES = [
     'agent_control.py', 'app.py', 'automation.py', 'backup_manager.py', 'bootstrap_openwebui.py',
@@ -74,7 +75,7 @@ def main():
         control = root / 'DEBIAN/control'
         control.parent.mkdir(parents=True)
         control.write_text('''Package: hermes-installer
-Version: 1.0.0
+Version: {version}
 Section: utils
 Priority: optional
 Architecture: {architecture}
@@ -84,7 +85,7 @@ Description: Hermes graphical setup
  Highly Efficient Real-time Machine for Everyday Support.
  Installs the Hermes cloud assistant and guides first-run configuration.
 Support: anshul.pandhare@mitwpu.edu.in, miheer.sabnis@mitwpu.edu.in
-'''.format(architecture=args.architecture))
+'''.format(architecture=args.architecture, version=VERSION))
         copyright_file = root / 'usr/share/doc/hermes-installer/copyright'
         copyright_file.parent.mkdir(parents=True, exist_ok=True)
         copyright_file.write_text('Copyright: Anshul & Miheer\nLicense: All rights reserved.\n')

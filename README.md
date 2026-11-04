@@ -41,8 +41,8 @@ Tools run under the signed-in user's permissions. Some actions require explicit 
 |---|---|---|---|
 | Debian-family Linux, x86-64 | `.deb` | Development build; current Mint setup is the reference | X11 is the complete target; Wayland is limited |
 | Debian-family Linux, ARM64 | `.deb` | Build supported; hardware validation pending | X11 where available |
-| Windows 10/11 x64 | `.exe` | Preview; native installation unverified | Windows APIs; some Linux features remain unported |
-| Apple Silicon macOS 14+ | `.zip` containing `Hermes.app` | Preview; unsigned and native installation unverified | Accessibility and Screen Recording permission required |
+| Windows 10/11 x64 | `.exe` | V8 release installer; signing is optional in CI | Windows APIs; unlocked user session required |
+| Apple Silicon macOS 14+ | `.pkg` and `.dmg` | V8 release installers; signing/notarization is optional in CI | Accessibility and Screen Recording permission required |
 
 The build workflow produces artifacts on every run. A version tag creates a **draft prerelease** for manual review. Build success is evidence that a package was assembled, not that native desktop control passed on every machine. Production distribution requires native acceptance tests and code signing; Apple distribution also requires notarization.
 
@@ -58,7 +58,7 @@ For the tested Linux installation flow, see [Portability](core/PORTABILITY.md) a
 
 ### Windows and Mac
 
-Read the [Windows preview guide](platforms/windows/README-WINDOWS.md) or [Mac preview guide](platforms/macos/README-MACOS.md). These contain the actual requirements, permission steps, gaps, and acceptance tests. Neither preview carries your API keys or private data. An unsigned Windows executable or Mac app can trigger operating-system trust warnings; do not disable system protections to run a blocked preview.
+Read the [Windows guide](platforms/windows/README-WINDOWS.md) or [Mac guide](platforms/macos/README-MACOS.md). Neither installer carries API keys or private data. Unsigned builds can trigger normal operating-system trust warnings; signed public releases require the publisher credentials described in the release checklist.
 
 ## How Hermes works
 
@@ -87,7 +87,7 @@ tools/                Build assembly and repository checks
 
 ## Build and release
 
-The workflow in [build.yaml](.github/workflows/build.yaml) runs on pushes, pull requests, and manual dispatch. It builds Linux packages for `amd64` and `arm64`, a Windows `.exe` preview, and a Mac `.app` preview ZIP. It runs shared tests on Linux, Mac overlay tests on a Mac runner, and Windows overlay tests on a Windows runner. These checks do not replace installing and exercising each package on a real target. CI uploads each artifact separately. A `v*` tag drafts a prerelease; a person must validate and publish it.
+The workflow in [build.yaml](.github/workflows/build.yaml) runs on pushes, pull requests, and manual dispatch. It builds Linux packages for `amd64` and `arm64`, a Windows x64 `.exe`, and Apple Silicon `.pkg` plus `.dmg` installers on native runners. Publisher certificates and Apple notarization are activated only through repository secrets. CI uploads hashes with every artifact. A `v*` tag creates a draft release for final human validation and publishing.
 
 Local builds use `python packaging/build_deb.py --architecture amd64 --output dist/Hermes-linux-amd64.deb` for Linux. Windows and Mac builds first run `python tools/assemble.py windows dist/windows` or `python tools/assemble.py macos dist/macos`, then their platform build scripts with the dependencies described in the workflow. Build on a disposable machine or CI runner: installers download large dependencies.
 
@@ -101,6 +101,6 @@ See [Release checklist](RELEASE.md) for versioning and native validation gates.
 
 ## Project status
 
-The active Linux installation is the reference. This repository copy does not replace it. The first cross-platform milestone is native smoke testing of each installer and the file, browser, screenshot, startup, and uninstall paths. After those pass, we can trim remaining duplicated adapters, add signing, and promote the previews to supported releases.
+Linux remains the reference installation. Windows and macOS now have proper V8 installer pipelines, safe upgrades and native regression jobs. Public distribution still requires publisher signing credentials and clean-machine acceptance tests of the exact release artifacts.
 
 Created by **Anshul & Miheer**. Support: anshul.pandhare@mitwpu.edu.in · miheer.sabnis@mitwpu.edu.in.

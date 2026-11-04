@@ -1,4 +1,4 @@
-"""macOS preview wizard; native privacy permissions remain owner-controlled."""
+"""Hermes V8 macOS setup; native privacy permissions remain owner-controlled."""
 import os
 import platform
 import shutil
@@ -48,7 +48,7 @@ class MacSetup(Setup):
     def terminal(self):
         target=CONFIG_DIR/'allow-terminal'
         if target.exists(): target.unlink(); self.dialog('Terminal disabled','Command execution is now disabled.'); return
-        if self.dialog('Enable command execution?','Commands run with your Mac account permissions. This preview has no filesystem sandbox for commands. Enable only for your trusted Hermes account.',confirm=True):
+        if self.dialog('Enable command execution?','Commands run with your Mac account permissions. macOS does not provide the Linux command sandbox used by Hermes. Enable only for your trusted Hermes account.',confirm=True):
             target.parent.mkdir(parents=True,exist_ok=True); target.write_text('Explicit owner consent\n'); target.chmod(0o600)
 
     def startup(self): self.go(5)
@@ -69,11 +69,11 @@ class MacSetup(Setup):
 
     def render(self):
         super().render()
-        descriptions={0:'Set up the Apple Silicon preview on macOS 14 or newer. Internet and at least 12 GB free space are required. Native Mac testing is still pending.',
+        descriptions={0:'Set up Hermes V8 on Apple Silicon with macOS 14 or newer. Internet and at least 12 GB free space are required.',
           1:'Install pinned dependencies, Open WebUI and Hermes in your user account. Cloud AI only; no local model weights are downloaded.',
           4:'Hermes starts after you log into your Mac. Grant desktop permissions, then connect Tailscale for remote access. Automatic Mac login is not configured.',
-          5:'Verify local services and presets, then test cloud chat, files, browser control, screenshots and voice on this Mac. Permissions and native controls still need acceptance testing.',
-          6:'Hermes is configured for startup at login. Keep your Mac awake and unlocked for desktop actions. This is an unsigned, unverified macOS preview.'}
+          5:'Verify local services, V8 agent tools and presets, then test cloud chat, goals, files, browser control, screenshots and voice on this Mac.',
+          6:'Hermes V8 is configured for startup at login. Keep your Mac awake and unlocked for desktop actions. Cloud services require your own API keys.'}
         if self.step in descriptions: self.body.configure(text=descriptions[self.step])
         if self.step==4:
             for child in self.choice.winfo_children(): child.destroy()

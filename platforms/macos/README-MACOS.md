@@ -1,55 +1,47 @@
-# Hermes macOS preview — Apple Silicon
+# Hermes V8 for macOS
 
-This is an unsigned development preview for **Apple Silicon (M1 and newer), macOS 14+**, with Python 3.12. It has not been run on a Mac. It is not a signed/notarized production installer or a verified full equivalent of the Linux version. Test on a spare Mac/user account first.
+Hermes provides two native Apple Silicon deliverables for macOS 14 and newer:
 
-## Which file to use
+- **Hermes-8.0.0-macOS-Apple-Silicon.pkg** — standard Installer package.
+- **Hermes-8.0.0-macOS-Apple-Silicon.dmg** — Finder disk image containing Hermes.app and the PKG.
 
-Copy **Hermes-macOS-Preview.zip** to your Mac and extract it. Move **Hermes.app** into your user's Applications folder, then open it. The other files in the development folder are source and build inputs.
+The package installs Hermes.app in `/Applications`. First launch prepares the owner-only runtime and opens the same Hermes setup experience used by the other editions.
 
-The app opens Terminal for preparation. If Python 3.12 with Tk is missing, it asks before downloading the official Python installer, checks a pinned SHA-256 hash and invokes macOS signature checking, then opens Apple's package installer. You must complete that installer and return to Terminal. Afterward the dark Hermes wizard opens. Internet and at least 12 GB free space are required.
+## Installation
 
-Gatekeeper may block this unsigned app. It has not been approved by Apple. Do not disable Gatekeeper or other Mac security settings to make it work. A signed release needs an Apple Developer ID, notarization and real Mac validation.
+1. Open the DMG and run the PKG, or run the standalone PKG directly.
+2. Open Hermes from Applications. If Python 3.12 with Tk is unavailable, Hermes offers the official Python.org package, verifies its pinned hash and Apple-recognized signature, and lets Apple's Installer handle it.
+3. Complete the Hermes wizard, create the first owner account, install Alpha, Beta and Gamma, and add your own provider keys in Open WebUI.
+4. Grant Accessibility and Screen Recording only if desktop control and vision are wanted. Grant microphone access to the browser for voice.
+5. Connect Tailscale if remote access is wanted. Hermes starts through a per-user LaunchAgent after login.
 
-## Setup
+Installing a newer package preserves conversations, provider connections, goals, routines, memories and backups. First launch republishes the canonical V8 tool, restarts the local supervisor and verifies the services.
 
-1. Run the compatibility check and install the dependencies in the wizard.
-2. Open Hermes, create your owner account and return to add Alpha, Beta and Gamma.
-3. Enter your own NVIDIA API key in Open WebUI; optionally add Deepgram and ElevenLabs. No keys, chats or local model weights are included.
-4. Grant Accessibility and Screen Recording permissions in System Settings. Grant microphone permission to the browser for voice. Depending on macOS attribution, the permission entry may be Python, Terminal or Hermes. This identity and background launch behavior need Mac testing.
-5. Install/sign into Tailscale using the official link in setup, then enable Serve. Tailscale installation and system-extension approval are manual in this preview.
-6. Run verification and test the operations listed below.
+## Included capabilities
 
-Hermes starts through a per-user LaunchAgent after login. Keep the Mac awake and unlocked for desktop control. Automatic Mac login is not configured. Terminal execution stays disabled until you explicitly enable it; enabled commands have your account permissions and no filesystem sandbox.
+- Hermes V8 goals, missions, approvals, routines, command center, timeline, workspace context, preferences and skill registry.
+- Alpha, Beta and Gamma cloud presets, web search, cloud vision, optional Deepgram and ElevenLabs voice.
+- File and code workflows, opt-in commands, application launch, windows, keyboard, pointer, screenshots, clipboard, audio and managed Chromium browsing.
+- Persistent background work, memory, planning, safety modes, emergency stop, supervision, backups, repair and guarded uninstall.
 
-## Implemented versus unverified
+No Ollama, local model weights, API keys, conversations or personal credentials are included.
 
-The cloud presets, web search integration, file/code operations, memory, planning, task engine, document creation, backups and authentication are carried over. Mac implementations are provided for app discovery/launch, window listing and focus, text/keyboard/mouse input, screenshots, clipboard, audio volume/mute, screen layout and managed Chrome/Edge browsing. Every native Mac implementation is still unverified on a Mac. Screen capture and vision can transmit your screenshot to your configured cloud provider.
+## macOS security model
 
-Space/workspace management, media-player control, power-policy controls and maximize/restore are not implemented. Window drag behavior and legacy TextEdit automation are not equivalent to the Linux editor workflows. Ambiguous window titles are rejected. Keyboard support is limited to the implemented common shortcuts. Managed browsing needs an existing Chrome/Edge/Chromium installation; Safari is not the managed automation backend. Git, Node.js, editors, Tailscale and other development applications are not automatically installed.
+Hermes works with the signed-in user's permissions. Accessibility, Screen Recording and microphone grants remain under System Settings. Locked desktops, authentication dialogs, CAPTCHAs and macOS security boundaries cannot be bypassed. Command execution stays disabled until the owner enables it and then uses normal Mac account permissions.
 
-This app bundle is a shell launcher plus the shared Tk wizard, not a compiled native Cocoa application. It is distributed as a ZIP, not a signed PKG or DMG. The initial Terminal preparation and Python installation differ from the Linux installer. Inter may fall back to the system font.
+CI ad-hoc-signs the app when no Apple certificate is configured. For public distribution, configure Developer ID Application and Installer identities plus notarization secrets; the workflow then signs, timestamps, notarizes and staples the artifacts. Without those credentials, macOS displays its normal unidentified-developer confirmation.
 
-## Data, uninstall and privacy
+## Uninstall and data
 
-Runtime and data live in `~/Library/Application Support/Hermes`. Startup uses `~/Library/LaunchAgents/com.hermes.assistant.plist`. Services bind to loopback. Runtime and private data directories use owner-only permissions.
+Use Uninstall from the Hermes Ready page, then move Hermes.app to Trash if it remains. Runtime and automatic startup are removed. Personal data is kept by default; a separately confirmed option deletes chats, keys, settings and backups. Documents elsewhere are always kept.
 
-The Ready page offers **Uninstall**. It stops the Hermes LaunchAgent and removes its private runtime and code. Keep personal data by default or explicitly delete chats, keys, settings and backups. Your documents elsewhere and shared Python/Tailscale/browser installations are kept. Move Hermes.app to Trash afterward. The uninstaller has not been tested on a Mac.
+Runtime and data: `~/Library/Application Support/Hermes`
+Startup: `~/Library/LaunchAgents/com.hermes.assistant.plist`
 
-## Required Mac acceptance tests
+## Release verification
 
-- First launch, Python preparation, download failure/retry and private runtime installation.
-- Owner signup, three presets, provider authentication, web search and actual tool calls.
-- Accessibility and Screen Recording consent; locked desktop and permission-denied behavior.
-- New document creation/read/edit, memory, plan and background workflow.
-- Open TextEdit and a managed browser; target a unique window; type Unicode/multiline text; capture and analyze a screenshot.
-- Tailscale phone access, microphone input and spoken output.
-- Reboot/login startup, sleep/wake, service failures and restart behavior.
-- Keep-data and delete-data uninstall paths; preserved documents and shared software.
+The Apple Silicon CI job assembles V8, runs native regressions, builds and verifies Hermes.app, PKG and DMG, optionally signs/notarizes them, recalculates SHA-256 and uploads both installers. Before public distribution, install the exact artifacts on a clean Mac and verify privacy grants, provider login, a real tool call, desktop control, managed browser, startup, sleep/wake, Tailscale, backup, upgrade and uninstall.
 
-Build validation performed on Linux is recorded in VALIDATION.md in the development folder. It cannot establish that these Mac tests pass.
-
-Apple permissions: https://support.apple.com/guide/mac-help/control-access-screen-system-audio-recording-mchld6aa7d23/mac
-Apple distribution requirements: https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution
-Python: https://www.python.org/downloads/release/python-31210/
-
-Publisher: Anshul & Miheer. Hermes code: All rights reserved. Third-party components retain their own licenses. Support: anshul.pandhare@mitwpu.edu.in / miheer.sabnis@mitwpu.edu.in.
+Publisher: **Anshul & Miheer** · All rights reserved.
+Support: anshul.pandhare@mitwpu.edu.in · miheer.sabnis@mitwpu.edu.in

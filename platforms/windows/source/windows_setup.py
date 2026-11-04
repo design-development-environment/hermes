@@ -1,4 +1,4 @@
-"""Windows installer using the same v1 Hermes graphical components."""
+"""Hermes V8 Windows setup and repair application."""
 import os
 import sys
 import subprocess
@@ -67,11 +67,11 @@ class WindowsSetup(Setup):
 
     def render(self):
         super().render()
-        text={0:'Set up Hermes on Windows 10 or 11, 64-bit. This preview uses cloud AI and your Windows desktop. Allow at least 12 GB free space and a working internet connection.',
+        text={0:'Set up Hermes V8 on Windows 10 or 11, 64-bit. Hermes uses cloud AI and authenticated tools on your Windows desktop. Allow at least 12 GB free space and a working internet connection.',
               1:'Install the pinned Python dependencies, Open WebUI and Hermes background processes. Downloads can take several minutes. Installation can be retried if a download fails.',
               4:'Hermes starts automatically when you sign into Windows. Connect Tailscale, then enable Tailscale Serve for phone access. Automatic login requires entering your Windows credentials in Microsoft Autologon.',
-              5:'Check the local services and model presets. Then test cloud chat, files, a screenshot, browser control, voice and phone access. This build has not yet been verified on a physical Windows PC.',
-              6:'Hermes is configured to start when you sign into Windows. Desktop control requires an unlocked session. Cloud services require your own API keys. This is a Windows preview build.'}
+              5:'Check the local services, V8 agent tools and model presets. Then test cloud chat, goals, files, screenshots, browser control, voice and phone access.',
+              6:'Hermes V8 is configured to start when you sign into Windows. Desktop control requires an unlocked session. Cloud services require your own API keys.'}
         if self.step in text: self.body.configure(text=text[self.step])
         if self.step==4:
             RoundedButton(self.choice,text='Terminal permission',command=self.terminal).pack(anchor='w',pady=4)

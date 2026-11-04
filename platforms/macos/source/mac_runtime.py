@@ -44,6 +44,25 @@ def prepare():
 def start():
     subprocess.run(['/bin/launchctl','kickstart',f'gui/{os.getuid()}/com.hermes.assistant'],check=True)
 
+def upgrade():
+    """Activate replaced source without resetting data, keys, or presets."""
+    prepare()
+    agent=Path.home()/'Library/LaunchAgents/com.hermes.assistant.plist'
+    if agent.exists():
+        subprocess.run(['/bin/launchctl','bootout',f'gui/{os.getuid()}',str(agent)],capture_output=True)
+    database=openwebui_data_dir()/'webui.db'
+    if database.exists():
+        from bootstrap_openwebui import readiness
+        if readiness().get('owner_exists'):
+            subprocess.run([str(PYTHON),str(PROJECT_ROOT/'sync_openwebui_tool.py')],check=True,env=environment())
+    (CONFIG_DIR/'stop').unlink(missing_ok=True)
+    startup()
+    for _ in range(120):
+        if all(check_url(p) for p in (3000,8765,8766)):
+            return
+        time.sleep(1)
+    raise RuntimeError('Hermes was upgraded but its local services did not become ready.')
+
 def startup():
     import plistlib
     folder=Path.home()/'Library/LaunchAgents'; folder.mkdir(parents=True,exist_ok=True)
@@ -125,13 +144,18 @@ def verify():
     if state['owner_exists']:
         with sqlite3.connect(openwebui_data_dir()/'webui.db') as db:
             count=db.execute("SELECT count(*) FROM model WHERE id IN ('hermes-v4','hermes-cloud-preview','hermes-gamma')").fetchone()[0]
+            specs=json.loads(db.execute("SELECT specs FROM tool WHERE id='hermes_v4'").fetchone()[0])
         print(f'Model presets: {count}/3')
         if count!=3: failed.append('presets')
+        names={item['name'] for item in specs}
+        required={'create_personal_goal','draft_personal_mission','create_agent_routine','get_personal_command_center'}
+        print(f'Hermes V8 tools: {len(names)}')
+        if not required <= names: failed.append('v8-tools')
     if failed: raise RuntimeError('Verification failed: '+str(failed))
     print('Local checks passed. Cloud chat, voice and phone access require your provider keys and hands-on testing.')
 
 if __name__=='__main__':
     try:
-        {'install':install,'verify':verify,'supervise':supervise,'start':start}[sys.argv[1]]()
+        {'install':install,'upgrade':upgrade,'verify':verify,'supervise':supervise,'start':start}[sys.argv[1]]()
     except Exception as exc:
         print(str(exc),flush=True); raise

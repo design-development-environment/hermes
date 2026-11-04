@@ -25,6 +25,7 @@ TASK_DB = __import__("platform_support").DATA_DIR / "tasks.db"
 MEMORY_DB = __import__("platform_support").DATA_DIR / "memory.db"
 PLAN_DB = __import__("platform_support").DATA_DIR / "plans.db"
 GOVERNANCE_DB = __import__("platform_support").DATA_DIR / "governance.db"
+AGENT_DB = __import__("platform_support").DATA_DIR / "agent.db"
 KEEP_BACKUPS = 14
 GPG_RECIPIENT = os.environ.get("HERMES_BACKUP_GPG_RECIPIENT", "").strip()
 CONFIG_FILES = sorted({
@@ -114,6 +115,7 @@ def create_backup() -> dict:
             (MEMORY_DB, "memory.db"),
             (PLAN_DB, "plans.db"),
             (GOVERNANCE_DB, "governance.db"),
+            (AGENT_DB, "agent.db"),
         ):
             if source.is_file():
                 snapshot = temporary / name
@@ -121,7 +123,7 @@ def create_backup() -> dict:
                 databases.append(snapshot)
         manifest = {
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "version": "alpha",
+            "version": "8.0.0",
             "hostname": __import__("platform").node(),
             "git_head": command_output(["git", "-C", str(PROJECT), "rev-parse", "HEAD"]),
             "user_services": command_output(["systemctl", "--user", "is-active", "hermes-action-bridge.service", "hermes-documents.service", "open-webui.service"]),

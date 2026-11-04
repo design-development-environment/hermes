@@ -15,6 +15,8 @@ SHARED_MODULES = (
     'sync_openwebui_tool.py', 'task_control.py', 'vision.py',
     'workflow_engine.py', 'workflows.py', 'workspace_preset.py',
 )
+SHARED_FILES = ('model_instructions.txt',)
+RELEASE_FILES = ('LICENSE', 'VERSION')
 
 
 def assemble(platform: str, destination: Path) -> None:
@@ -29,6 +31,12 @@ def assemble(platform: str, destination: Path) -> None:
         if target.exists():
             raise RuntimeError(f'Duplicate shared module: {target}')
         shutil.copy2(ROOT / 'core' / name, target)
+    # These files are intentionally identical on every platform.  Overwrite
+    # stale port snapshots so model behavior and release identity cannot drift.
+    for name in SHARED_FILES:
+        shutil.copy2(ROOT / 'core' / name, destination / 'source' / name)
+    for name in RELEASE_FILES:
+        shutil.copy2(ROOT / name, destination / name)
 
 
 if __name__ == '__main__':

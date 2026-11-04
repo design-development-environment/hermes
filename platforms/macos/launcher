@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 resources="$(cd "$(dirname "$0")/../Resources" && pwd)"
+if [[ -x "$HOME/Library/Application Support/Hermes/runtime/bin/python" && -f "$HOME/Library/Application Support/Hermes/source/mac_setup.py" ]]; then
+    /usr/bin/open -a Terminal "$resources/bootstrap.command"
+    exit 0
+fi
 /usr/bin/osascript - "$resources/bootstrap.command" <<'APPLESCRIPT'
 on run argv
     tell application "Terminal"

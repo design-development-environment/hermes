@@ -16,25 +16,49 @@ Var NodeBox
 Var CodeBox
 Var TailscaleBox
 Var OptionsDialog
-Name "Hermes Windows Preview"
-OutFile "Hermes-Windows-Setup.exe"
+!ifndef PRODUCT_VERSION
+  !define PRODUCT_VERSION "8.0.0"
+!endif
+!ifndef PRODUCT_VERSION_QUAD
+  !define PRODUCT_VERSION_QUAD "8.0.0.0"
+!endif
+Name "Hermes"
+Caption "Install Hermes ${PRODUCT_VERSION}"
+BrandingText "Hermes · Anshul & Miheer"
+OutFile "Hermes-${PRODUCT_VERSION}-Windows-x64-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\Hermes"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
 Icon "source/branding/hermes.ico"
 UninstallIcon "source/branding/hermes.ico"
-VIProductVersion "1.0.0.2"
+VIProductVersion "${PRODUCT_VERSION_QUAD}"
 VIAddVersionKey "ProductName" "Hermes"
-VIAddVersionKey "FileDescription" "Hermes Windows Preview Installer"
+VIAddVersionKey "FileDescription" "Hermes Windows Installer"
 VIAddVersionKey "CompanyName" "Anshul & Miheer"
 VIAddVersionKey "LegalCopyright" "All rights reserved."
-VIAddVersionKey "FileVersion" "1.0.0-preview.2"
+VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
+VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}"
 !define MUI_ABORTWARNING
+!define MUI_ICON "source/branding/hermes.ico"
+!define MUI_UNICON "source/branding/hermes.ico"
+!define MUI_WELCOMEPAGE_TITLE "Welcome to Hermes"
+!define MUI_WELCOMEPAGE_TEXT "Install Hermes ${PRODUCT_VERSION}, the Highly Efficient Real-time Machine for Everyday Support.$\r$\n$\r$\nHermes uses cloud AI and authenticated local tools. Your provider keys and personal data are not included in this installer."
+!define MUI_FINISHPAGE_RUN "Hermes"
+!define MUI_FINISHPAGE_RUN_FUNCTION LaunchHermes
+!define MUI_FINISHPAGE_RUN_TEXT "Open Hermes"
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "LICENSE"
+!insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 UninstPage custom un.CleanupOptions un.CleanupOptionsLeave
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
+
+Function LaunchHermes
+  Exec '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "$INSTDIR\bootstrap.ps1"'
+FunctionEnd
 
 Function .onInit
   ${IfNot} ${RunningX64}
@@ -112,6 +136,7 @@ Section "Hermes"
   File "bootstrap.ps1"
   File "uninstall.ps1"
   File "README-WINDOWS.md"
+  File "LICENSE"
   SetOutPath "$INSTDIR\source"
   File /r /x __pycache__ "source/*"
   SetOutPath "$INSTDIR\bootstrap"
@@ -120,17 +145,18 @@ Section "Hermes"
   SetOutPath "$INSTDIR"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   CreateShortcut "$SMPROGRAMS\Hermes.lnk" "$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "$INSTDIR\bootstrap.ps1"' "$INSTDIR\source\branding\hermes.ico"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "DisplayName" "Hermes Windows Preview"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "DisplayVersion" "1.0.0-preview.2"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "DisplayName" "Hermes"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "Publisher" "Anshul & Miheer"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "UninstallString" '"$INSTDIR\Uninstall.exe"'
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "QuietUninstallString" '"$INSTDIR\Uninstall.exe" /S'
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "DisplayIcon" "$INSTDIR\source\branding\hermes.ico"
-  DetailPrint "Preparing the Hermes graphical setup…"
-  ExecWait '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\bootstrap.ps1"' $0
-  ${If} $0 != 0
-    MessageBox MB_ICONEXCLAMATION "Preparation failed. Open Hermes from Start to retry. See bootstrap.log in the install folder."
-    SetErrorLevel 1
-  ${EndIf}
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "InstallLocation" "$INSTDIR"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "URLInfoAbout" "https://github.com/design-development-environment/hermes"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "HelpLink" "mailto:anshul.pandhare@mitwpu.edu.in"
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "NoModify" 1
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "NoRepair" 1
+  DetailPrint "Hermes is installed. The graphical setup will open when this installer finishes."
 SectionEnd
 
 Section "Uninstall"
@@ -146,6 +172,7 @@ Section "Uninstall"
   Delete "$INSTDIR\uninstall.ps1"
   Delete "$INSTDIR\bootstrap.log"
   Delete "$INSTDIR\README-WINDOWS.md"
+  Delete "$INSTDIR\LICENSE"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes"

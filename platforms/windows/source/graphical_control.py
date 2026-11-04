@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cinnamon/X11 appliance integration for Hermes Alpha.
+"""Native Windows desktop integration for Hermes.
 
 All actions run as the logged-in desktop user through the authenticated Action
 Bridge.  The module deliberately avoids privileged package, driver, network,
@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from platform_support import graphical_environment, platform_status, require_x11_automation
 
 
-router = APIRouter(prefix="/graphical", tags=["Cinnamon desktop integration"])
+router = APIRouter(prefix="/graphical", tags=["Windows desktop integration"])
 MAX_OUTPUT = 40_000
 MAX_CLIPBOARD = 1_000_000
 
@@ -177,7 +177,7 @@ def move_window_to_workspace(request: WindowWorkspaceRequest):
     raise HTTPException(501, 'This Linux desktop feature has not yet been ported to Windows: move_window_to_workspace')
 
 
-@router.post("/settings", operation_id="open_cinnamon_settings_panel")
+@router.post("/settings", operation_id="open_desktop_settings_panel")
 def open_settings(request: SettingsPanelRequest):
     os.startfile('ms-settings:')
     return {'success':True}

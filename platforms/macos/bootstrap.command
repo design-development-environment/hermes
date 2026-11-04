@@ -5,7 +5,7 @@ resources="$(cd "$(dirname "$0")" && pwd)"
 base="$HOME/Library/Application Support/Hermes"
 trap 'printf "\nSetup stopped. Read the error above. Press Return to close.\n"; read -r reply' ERR
 if [[ "$(uname -s)" != Darwin || "$(uname -m)" != arm64 ]]; then
-    printf 'This preview requires an Apple Silicon Mac running natively, without Rosetta.\n'
+    printf 'Hermes requires an Apple Silicon Mac running natively, without Rosetta.\n'
     exit 1
 fi
 major="$(sw_vers -productVersion | cut -d. -f1)"
@@ -45,4 +45,9 @@ mkdir -p "$base/source"
 cp -R "$resources/source/." "$base/source/"
 export PYTHONUTF8=1
 export PIP_CACHE_DIR="$base/data/cache/pip"
+if [[ -x "$base/runtime/bin/open-webui" ]]; then
+    "$base/runtime/bin/python" "$base/source/mac_runtime.py" upgrade
+    /usr/bin/open 'http://127.0.0.1:3000'
+    exit 0
+fi
 "$base/runtime/bin/python" "$base/source/mac_setup.py"

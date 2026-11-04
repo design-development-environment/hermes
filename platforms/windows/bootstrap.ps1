@@ -53,6 +53,12 @@ try {
     $runtime = "$root\runtime\Scripts\python.exe"
     & $runtime -m pip install --no-cache-dir --no-index --find-links "$root\bootstrap" Pillow==12.0.0
     if ($LASTEXITCODE -ne 0) { throw 'Could not install the setup graphics library.' }
+    if (Test-Path "$root\runtime\Scripts\open-webui.exe") {
+        & $runtime "$root\source\windows_runtime.py" upgrade
+        if ($LASTEXITCODE -ne 0) { throw 'Could not upgrade the existing Hermes runtime.' }
+        Stop-Transcript | Out-Null
+        exit 0
+    }
     Start-Process -FilePath "$root\runtime\Scripts\pythonw.exe" -ArgumentList @("`"$root\source\windows_setup.py`"") -WorkingDirectory "$root\source"
     Stop-Transcript | Out-Null
     exit 0

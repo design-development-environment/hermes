@@ -87,7 +87,12 @@ def desktop_call(argv):
                 for name,kind,value in [('AXPosition',A.kAXValueCGPointType,(x,y)),('AXSize',A.kAXValueCGSizeType,(w,h))]:
                     if A.AXUIElementSetAttributeValue(window,name,A.AXValueCreate(kind,value)): raise RuntimeError('Window layout rejected')
                 return ''
-            raise RuntimeError('Maximize/restore is not implemented in this preview')
+            if '-b' in args:
+                zoom=ax_get(window,'AXZoomButton')
+                if A.AXUIElementPerformAction(zoom,'AXPress'):
+                    raise RuntimeError('The window rejected the zoom request')
+                return ''
+            raise RuntimeError('Unsupported macOS window operation')
     if program=='xdotool':
         action=args[0]
         if action=='getactivewindow':

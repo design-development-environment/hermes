@@ -64,7 +64,7 @@ def desktop_call(argv):
             elif '-b' in args:
                 win32gui.ShowWindow(handle,win32con.SW_MAXIMIZE if args[-1].startswith('add') else win32con.SW_RESTORE)
             else:
-                raise RuntimeError('Virtual desktop movement is not supported in this Windows preview')
+                raise RuntimeError('Virtual desktop movement is not available through the supported Windows API')
             return ''
     if program=='xdotool':
         action=args[0]
