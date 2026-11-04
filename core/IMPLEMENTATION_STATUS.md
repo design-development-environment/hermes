@@ -1,8 +1,8 @@
 # Hermes implementation status
 
-Current release: **Hermes V8**
+Current release: **Hermes 1.0.0**
 
-## V8 — persistent personal agent
+## 1.0 — persistent personal agent
 
 - Persistent goals and milestones survive chats, service restarts, and reboots.
 - Multi-workstream missions use planner, researcher, browser, coder, operator,

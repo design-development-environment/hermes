@@ -1,9 +1,9 @@
-# Hermes V8 for macOS
+# Hermes 1.0 for macOS
 
 Hermes provides two native Apple Silicon deliverables for macOS 14 and newer:
 
-- **Hermes-8.0.0-macOS-Apple-Silicon.pkg** — standard Installer package.
-- **Hermes-8.0.0-macOS-Apple-Silicon.dmg** — Finder disk image containing Hermes.app and the PKG.
+- **Hermes-1.0.0-macOS-Apple-Silicon.pkg** — standard Installer package.
+- **Hermes-1.0.0-macOS-Apple-Silicon.dmg** — Finder disk image containing Hermes.app and the PKG.
 
 The package installs Hermes.app in `/Applications`. First launch prepares the owner-only runtime and opens the same Hermes setup experience used by the other editions.
 
@@ -15,11 +15,11 @@ The package installs Hermes.app in `/Applications`. First launch prepares the ow
 4. Grant Accessibility and Screen Recording only if desktop control and vision are wanted. Grant microphone access to the browser for voice.
 5. Connect Tailscale if remote access is wanted. Hermes starts through a per-user LaunchAgent after login.
 
-Installing a newer package preserves conversations, provider connections, goals, routines, memories and backups. First launch republishes the canonical V8 tool, restarts the local supervisor and verifies the services.
+Installing a newer package preserves conversations, provider connections, goals, routines, memories and backups. First launch republishes the canonical tool, restarts the local supervisor and verifies the services.
 
 ## Included capabilities
 
-- Hermes V8 goals, missions, approvals, routines, command center, timeline, workspace context, preferences and skill registry.
+- Goals, missions, approvals, routines, command center, timeline, workspace context, preferences and skill registry.
 - Alpha, Beta and Gamma cloud presets, web search, cloud vision, optional Deepgram and ElevenLabs voice.
 - File and code workflows, opt-in commands, application launch, windows, keyboard, pointer, screenshots, clipboard, audio and managed Chromium browsing.
 - Persistent background work, memory, planning, safety modes, emergency stop, supervision, backups, repair and guarded uninstall.
@@ -41,7 +41,7 @@ Startup: `~/Library/LaunchAgents/com.hermes.assistant.plist`
 
 ## Release verification
 
-The Apple Silicon CI job assembles V8, runs native regressions, builds and verifies Hermes.app, PKG and DMG, optionally signs/notarizes them, recalculates SHA-256 and uploads both installers. Before public distribution, install the exact artifacts on a clean Mac and verify privacy grants, provider login, a real tool call, desktop control, managed browser, startup, sleep/wake, Tailscale, backup, upgrade and uninstall.
+The Apple Silicon CI job assembles Hermes, runs native regressions, builds and verifies Hermes.app, PKG and DMG, optionally signs/notarizes them, recalculates SHA-256 and uploads both installers. Before wider distribution, install the exact artifacts on a clean Mac and verify privacy grants, provider login, a real tool call, desktop control, managed browser, startup, sleep/wake, Tailscale, backup, upgrade and uninstall.
 
 Publisher: **Anshul & Miheer** · All rights reserved.
 Support: anshul.pandhare@mitwpu.edu.in · miheer.sabnis@mitwpu.edu.in

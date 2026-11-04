@@ -15,5 +15,5 @@ publication still requires clean-machine acceptance testing and signatures.
    backup, repair, and uninstall. Record OS, CPU, and test results.
 5. For Windows and macOS, sign packages with the publisher's own credentials.
    Notarize the Mac package. Do not put signing credentials in source control.
-6. Push a matching `v*` tag only after validation. CI creates a **draft release**;
-   review hashes, signatures, notarization and native evidence before publishing.
+6. Push a matching `v*` tag only after validation. CI publishes the native
+   installers and platform-specific checksum files to GitHub Releases.

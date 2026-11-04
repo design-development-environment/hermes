@@ -1,4 +1,4 @@
-name: Build Hermes V8 installers
+name: Build Hermes installers
 
 on:
   push:
@@ -89,13 +89,13 @@ jobs:
           $result = Get-AuthenticodeSignature $installer.FullName
           if ($env:WINDOWS_CERTIFICATE_BASE64 -and $result.Status -ne 'Valid') { throw "Invalid installer signature: $($result.Status)" }
           $hash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLower()
-          "$hash  $($installer.Name)" | Set-Content -Encoding ascii dist/windows/SHA256SUMS
+          "$hash  $($installer.Name)" | Set-Content -Encoding ascii dist/windows/SHA256SUMS-windows-x64.txt
       - uses: actions/upload-artifact@v4
         with:
           name: hermes-windows-x64
           path: |
             dist/windows/Hermes-*-Windows-x64-Setup.exe
-            dist/windows/SHA256SUMS
+            dist/windows/SHA256SUMS-windows-x64.txt
           if-no-files-found: error
 
   macos:
@@ -155,7 +155,7 @@ jobs:
           fi
           pkgutil --check-signature "$PKG" || true
           hdiutil verify "$DMG"
-          shasum -a 256 "$PKG" "$DMG" | sed 's#  .*/#  #' > dist/macos/SHA256SUMS
+          shasum -a 256 "$PKG" "$DMG" | sed 's#  .*/#  #' > dist/macos/SHA256SUMS-macos-apple-silicon.txt
       - name: Remove temporary signing keychain
         if: always()
         run: |
@@ -169,10 +169,10 @@ jobs:
           path: |
             dist/macos/Hermes-*-macOS-Apple-Silicon.pkg
             dist/macos/Hermes-*-macOS-Apple-Silicon.dmg
-            dist/macos/SHA256SUMS
+            dist/macos/SHA256SUMS-macos-apple-silicon.txt
           if-no-files-found: error
 
-  draft-release:
+  release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [linux, windows, macos]
     runs-on: ubuntu-24.04
@@ -183,7 +183,7 @@ jobs:
         with:
           path: release-assets
           merge-multiple: true
-      - name: Create draft release
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release-assets/* --draft --title "Hermes $GITHUB_REF_NAME" --notes "Cross-platform Hermes V8 installers. Review native test evidence, signatures and hashes before publishing."
+        run: gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --title "Hermes ${GITHUB_REF_NAME#v}" --generate-notes

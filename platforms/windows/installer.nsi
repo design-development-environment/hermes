@@ -17,10 +17,10 @@ Var CodeBox
 Var TailscaleBox
 Var OptionsDialog
 !ifndef PRODUCT_VERSION
-  !define PRODUCT_VERSION "8.0.0"
+  !define PRODUCT_VERSION "1.0.0"
 !endif
 !ifndef PRODUCT_VERSION_QUAD
-  !define PRODUCT_VERSION_QUAD "8.0.0.0"
+  !define PRODUCT_VERSION_QUAD "1.0.0.0"
 !endif
 Name "Hermes"
 Caption "Install Hermes ${PRODUCT_VERSION}"

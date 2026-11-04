@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hermes V8 persistent personal-agent layer.
+"""Hermes persistent personal-agent layer.
 
 This module coordinates the existing planning, task, browser, memory, and
 governance systems.  It stores only owner-controlled metadata locally and never
@@ -30,7 +30,7 @@ from governance_control import safety_mode
 from platform_support import DATA_DIR, platform_status, writable_roots
 
 
-router = APIRouter(prefix="/agent", tags=["Hermes V8 personal agent"])
+router = APIRouter(prefix="/agent", tags=["Hermes personal agent"])
 DATABASE = DATA_DIR / "agent.db"
 SENSITIVE = re.compile(
     r"(?:sk-[A-Za-z0-9_-]{16,}|nvapi-[A-Za-z0-9_-]{12,}|Bearer\s+\S+|"

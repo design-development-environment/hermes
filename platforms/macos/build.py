@@ -150,7 +150,7 @@ def checksums():
     outputs = [path for path in (PKG, DMG) if path.is_file()]
     if not outputs:
         outputs = [CONTENTS / "Info.plist"]
-    (ROOT / "SHA256SUMS").write_text(
+    (ROOT / "SHA256SUMS-macos-apple-silicon.txt").write_text(
         "".join(f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n" for path in outputs),
         encoding="utf-8",
     )

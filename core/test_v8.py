@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for Hermes V8 persistent personal-agent behavior."""
+"""Regression tests for Hermes persistent personal-agent behavior."""
 
 from __future__ import annotations
 

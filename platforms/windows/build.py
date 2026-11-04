@@ -1,4 +1,4 @@
-"""Build the native Hermes V8 Windows installer."""
+"""Build the native Hermes Windows installer."""
 import hashlib
 import os
 import subprocess
@@ -27,5 +27,5 @@ output=root/f'Hermes-{version}-Windows-x64-Setup.exe'
 define='/' if os.name == 'nt' else '-'
 subprocess.run([makensis,'-V2',f'{define}DPRODUCT_VERSION={version}',f'{define}DPRODUCT_VERSION_QUAD={version}.0',str(root/'installer.nsi')],cwd=root,env=environment,check=True)
 files=[output, root/'build-tools/python-3.12.10-amd64.exe', root/'source/requirements-windows.lock']
-(root/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(root)}\n' for p in files))
+(root/'SHA256SUMS-windows-x64.txt').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(root)}\n' for p in files))
 print('Built',output, 'bytes:',output.stat().st_size)

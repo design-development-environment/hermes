@@ -1,6 +1,6 @@
-# Hermes V8 for Windows
+# Hermes 1.0 for Windows
 
-Hermes ships as **Hermes-8.0.0-Windows-x64-Setup.exe** for 64-bit Windows 10 and Windows 11. The installer is per-user, preserves existing data during upgrades, installs one Start-menu entry, configures startup at sign-in, and provides a guarded uninstaller.
+Hermes ships as **Hermes-1.0.0-Windows-x64-Setup.exe** for 64-bit Windows 10 and Windows 11. The installer is per-user, preserves existing data during upgrades, installs one Start-menu entry, configures startup at sign-in, and provides a guarded uninstaller.
 
 ## Installation
 
@@ -14,7 +14,7 @@ Upgrading with a newer setup file keeps conversations, API connections, goals, r
 
 ## Included capabilities
 
-- Hermes V8 persistent goals, missions, approval inbox, recurring routines, command center, timeline, workspace context, operator preferences and skills registry.
+- Persistent goals, missions, approval inbox, recurring routines, command center, timeline, workspace context, operator preferences and skills registry.
 - Alpha, Beta and Gamma cloud presets, cloud vision, web search, Deepgram speech input and ElevenLabs speech output when configured.
 - Files, multi-file coding, terminal permission, applications, windows, keyboard, mouse, screenshots, clipboard, notifications and managed Chromium workflows.
 - Restart-safe background work, memory, planning, safety modes, emergency stop, encrypted-backup readiness and owner-only local backups.
@@ -40,7 +40,7 @@ Application: `%LOCALAPPDATA%\Programs\Hermes`
 
 ## Release verification
 
-The native Windows CI job assembles the shared V8 core, runs platform regressions, verifies the official Python signature, builds with NSIS, optionally signs with the publisher certificate, recalculates SHA-256, and uploads the setup executable. Before public distribution, install the exact artifact on a clean Windows machine and verify provider login, a real tool call, desktop control, managed browser, startup, Tailscale, backup, upgrade and both uninstall choices.
+The native Windows CI job assembles the shared core, runs platform regressions, verifies the official Python signature, builds with NSIS, optionally signs with the publisher certificate, recalculates SHA-256, and uploads the setup executable. Before wider distribution, install the exact artifact on a clean Windows machine and verify provider login, a real tool call, desktop control, managed browser, startup, Tailscale, backup, upgrade and both uninstall choices.
 
 Publisher: **Anshul & Miheer** · All rights reserved.
 Support: anshul.pandhare@mitwpu.edu.in · miheer.sabnis@mitwpu.edu.in

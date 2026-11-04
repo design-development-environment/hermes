@@ -170,7 +170,7 @@ def verify():
         if count!=3: failed.append('presets')
         names={item['name'] for item in specs}
         required={'create_personal_goal','draft_personal_mission','create_agent_routine','get_personal_command_center'}
-        print(f'Hermes V8 tools: {len(names)}')
+        print(f'Hermes tools: {len(names)}')
         if not required <= names: failed.append('v8-tools')
     if failed: raise RuntimeError('Verification failed: '+str(failed))
     print('Local checks passed. Cloud chat, voice and phone access require your provider keys and hands-on testing.')

@@ -1,6 +1,6 @@
-# Hermes V8
+# Hermes 1.0
 
-Hermes V8 serves chat through Open WebUI with three cloud model presets and
+Hermes 1.0 serves chat through Open WebUI with three cloud model presets and
 uses one authenticated local Workspace Tool for desktop, managed-browser, coding,
 terminal, file, document, backup, and persistent background-task actions. Open
 WebUI is available through Tailscale Serve. The Open WebUI Workspace Tool is the
@@ -21,7 +21,7 @@ The generic amd64 Mint Cinnamon/XFCE desktop design is documented in
 - `openwebui_tool.py`: all Hermes functions offered to the model.
 - `agent_control.py`: persistent goals, missions, approvals, routines, timeline,
   explicit workspace context, operator preferences, skills, and command center.
-- `model_instructions.txt`: concise V8 personal-agent routing and safety instructions.
+- `model_instructions.txt`: concise personal-agent routing and safety instructions.
 - `sync_openwebui_tool.py`: publishes both files into Open WebUI.
 - `platform_support.py`: distribution, architecture, session, browser, localized
   folder, and capability detection shared by the services.
