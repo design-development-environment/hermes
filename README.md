@@ -86,7 +86,7 @@ tools/                Build assembly and repository checks
 
 ## Build and release
 
-The workflow in [build.yaml](.github/workflows/build.yaml) runs on pushes, pull requests, and manual dispatch. It builds Linux packages for `amd64` and `arm64`, a Windows `.exe` preview, and a Mac `.app` preview ZIP. It uploads each artifact separately. A `v*` tag drafts a prerelease; a person must validate and publish it.
+The workflow in [build.yaml](.github/workflows/build.yaml) runs on pushes, pull requests, and manual dispatch. It builds Linux packages for `amd64` and `arm64`, a Windows `.exe` preview, and a Mac `.app` preview ZIP. It runs shared tests on Linux, Mac overlay tests on a Mac runner, and Windows overlay tests on a Windows runner. These checks do not replace installing and exercising each package on a real target. CI uploads each artifact separately. A `v*` tag drafts a prerelease; a person must validate and publish it.
 
 Local builds use `python packaging/build_deb.py --architecture amd64 --output dist/Hermes-linux-amd64.deb` for Linux. Windows and Mac builds first run `python tools/assemble.py windows dist/windows` or `python tools/assemble.py macos dist/macos`, then their platform build scripts with the dependencies described in the workflow. Build on a disposable machine or CI runner: installers download large dependencies.
 
