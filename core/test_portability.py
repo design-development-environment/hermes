@@ -136,6 +136,12 @@ class FreshOpenWebUIBootstrapTests(unittest.TestCase):
             self.assertEqual(json.loads(config["rag.embedding_model"]), "nvidia/nemotron-3-embed-1b")
             self.assertEqual(json.loads(config["audio.stt.engine"]), "deepgram")
             self.assertEqual(json.loads(config["audio.tts.engine"]), "elevenlabs")
+            self.assertEqual(json.loads(config["ui.default_models"]), "hermes-v4")
+            self.assertFalse(json.loads(config["ui.default_interface_settings"])["chatBubble"])
+            self.assertEqual(len(json.loads(config["ui.prompt_suggestions"])), 4)
+            with sqlite3.connect(database) as db:
+                profile_meta = json.loads(db.execute("SELECT meta FROM model WHERE id='hermes-v4'").fetchone()[0])
+            self.assertEqual(len(profile_meta["suggestion_prompts"]), 4)
             self.assertNotIn("rag.openai.api_key", config)
 
 

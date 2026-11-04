@@ -1,8 +1,9 @@
 """Sync the canonical Hermes Workspace Tool source into Open WebUI."""
 
-import json
+import base64
 import importlib.util
 import inspect
+import json
 import sqlite3
 import sys
 import time
@@ -16,6 +17,54 @@ ROOT = Path(__file__).resolve().parent
 DB = openwebui_data_dir() / "webui.db"
 SOURCE = ROOT / "openwebui_tool.py"
 MODEL_INSTRUCTIONS = ROOT / "model_instructions.txt"
+
+HERMES_SUGGESTIONS = [
+    {
+        "title": ["See my", "workspace"],
+        "content": "Look at my current desktop, tell me what is open, and briefly summarize what I appear to be working on.",
+    },
+    {
+        "title": ["Check Hermes", "health"],
+        "content": "Run a complete Hermes health check and explain only anything that needs my attention.",
+    },
+    {
+        "title": ["Plan a", "computer task"],
+        "content": "Help me turn my next computer task into a clear plan. Ask only for information that is truly required before acting.",
+    },
+    {
+        "title": ["Continue my", "work"],
+        "content": "Review my recent Hermes goals and tasks, then suggest the single best thing to continue next. Do not take action until I approve it.",
+    },
+]
+
+HERMES_INTERFACE_DEFAULTS = {
+    "landingPageMode": "chat",
+    "chatBubble": False,
+    "widescreenMode": True,
+    "chatHoverPreview": False,
+    "webSearch": "always",
+    "enableMessageQueue": True,
+    "richTextInput": True,
+    "detectArtifacts": True,
+    "autoFollowUps": True,
+    "showChatTitleInTab": True,
+    "showUpdateToast": False,
+    "showChangelog": False,
+}
+
+
+def hermes_model_icon() -> str:
+    """Return the Hermes mark as an Open WebUI-supported model image data URI."""
+    candidates = (
+        ROOT / "branding/icon-dark.png",
+        ROOT / "packaging/branding/icon-dark.png",
+        ROOT.parent / "packaging/branding/icon-dark.png",
+        Path("/usr/share/icons/hicolor/1024x1024/apps/hermes.png"),
+    )
+    for path in candidates:
+        if path.is_file():
+            return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
+    return "/static/favicon.png"
 
 PLAN_STEP_SCHEMA = {
     "type": "object",
@@ -84,6 +133,7 @@ def generated_specs() -> list[dict]:
 def main():
     content = SOURCE.read_text(encoding="utf-8")
     compile(content, str(SOURCE), "exec")
+    profile_image = hermes_model_icon()
     with sqlite3.connect(DB, timeout=10) as db:
         owner = db.execute("SELECT id FROM user ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at LIMIT 1").fetchone()
         if owner is None:
@@ -229,8 +279,9 @@ def main():
         row = db.execute("SELECT user_id,params,meta,created_at FROM model WHERE id=?", ("hermes-v4",)).fetchone()
         if row is None:
             base_meta = {
-                "profile_image_url": "/static/favicon.png",
+                "profile_image_url": profile_image,
                 "description": "Hermes cloud assistant with local computer tools.",
+                "suggestion_prompts": HERMES_SUGGESTIONS,
                 "capabilities": {"web_search": True, "builtin_tools": True},
                 "toolIds": ["hermes_v4"],
             }
@@ -243,6 +294,8 @@ def main():
         params = json.loads(params_json)
         params["system"] = MODEL_INSTRUCTIONS.read_text(encoding="utf-8").strip()
         meta = json.loads(meta_json)
+        meta["profile_image_url"] = profile_image
+        meta["suggestion_prompts"] = HERMES_SUGGESTIONS
         capabilities = meta.setdefault("capabilities", {})
         capabilities["web_search"] = True
         capabilities["builtin_tools"] = True
@@ -287,6 +340,11 @@ def main():
             "ollama.api_configs": {},
             "ui.default_models": "hermes-v4",
             "ui.model_order_list": ["hermes-v4", "hermes-cloud-preview", "hermes-gamma"],
+            "ui.default_pinned_models": "hermes-v4,hermes-cloud-preview,hermes-gamma",
+            "ui.prompt_suggestions": HERMES_SUGGESTIONS,
+            "ui.default_interface_settings": HERMES_INTERFACE_DEFAULTS,
+            "ui.enable_community_sharing": False,
+            "ui.enable_message_rating": False,
             "rag.embedding_engine": "openai",
             "rag.embedding_model": "nvidia/nemotron-3-embed-1b",
             "rag.openai.api_base_url": "https://integrate.api.nvidia.com/v1",
