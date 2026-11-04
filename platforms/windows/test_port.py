@@ -32,7 +32,7 @@ class PortTests(unittest.TestCase):
         target=BASE/'DOCUMENTS/hello.txt'
         r=self.client.post('/computer/files/write',headers=self.headers,json={'path':str(target),'content':'Hello\nनमस्ते\nThird line'})
         self.assertEqual(r.status_code,200,r.text)
-        self.assertEqual(target.read_text(),'Hello\nनमस्ते\nThird line')
+        self.assertEqual(target.read_text(encoding='utf-8'),'Hello\nनमस्ते\nThird line')
         r=self.client.post('/computer/files/write',headers=self.headers,json={'path':str(target),'content':'overwrite'})
         self.assertNotEqual(r.status_code,200)
 
