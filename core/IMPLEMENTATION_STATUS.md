@@ -1,6 +1,25 @@
 # Hermes implementation status
 
-Current release: **Hermes Alpha**
+Current release: **Hermes V8**
+
+## V8 — persistent personal agent
+
+- Persistent goals and milestones survive chats, service restarts, and reboots.
+- Multi-workstream missions use planner, researcher, browser, coder, operator,
+  and reviewer roles to structure work, then hand approved steps to the existing
+  restart-safe task engine.
+- Owner approval inbox records expiring decisions without treating approval as
+  automatic execution.
+- On-demand, interval, daily, and weekly routines are created disabled, require
+  explicit enabling, and stop queuing work outside normal safety mode.
+- The command center combines goals, tasks, approvals, routines, safety state,
+  and proactive suggestions. The timeline records metadata, not message or file
+  contents.
+- Current-workspace context reports open windows, managed browser pages, and
+  bounded recent-file metadata only when requested; snapshots are opt-in.
+- The operator manual stores only explicit non-secret preferences. Core skills
+  cannot be disabled from chat, while optional/integration skills remain owner
+  controlled and still require authorized connections.
 
 ## Generic Mint desktop profile
 
@@ -120,8 +139,8 @@ Current release: **Hermes Alpha**
 
 ## Verified live
 
-- 100 Open WebUI tool functions use the one canonical Workspace Tool.
-- The 35-test regression suite passes; local and Tailscale health endpoints,
+- 122 Open WebUI tool functions use the one canonical Workspace Tool.
+- The 55-test regression suite passes; local and Tailscale health endpoints,
   NVIDIA model discovery, and the managed-browser open/read/close lifecycle pass.
 - The active WebUI runtime is CPU-only and 2.5 GB, replacing a 7.3 GB CUDA-heavy
   environment and recovering roughly 4.8 GB of disk space.

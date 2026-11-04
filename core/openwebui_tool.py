@@ -1194,3 +1194,145 @@ class Tools:
     async def create_encrypted_hermes_backup(self) -> str:
         """Create an encrypted backup only when a trusted GPG recipient is already configured by the owner."""
         return await self._request("POST", "/maintenance/backup-encrypted", timeout=240)
+
+    # ============================================================
+    # HERMES V8 — PERSISTENT PERSONAL AGENT
+    # ============================================================
+
+    async def create_personal_goal(
+        self, title: str, description: str = "", priority: int = 3,
+        target_date: Optional[str] = None, milestones: Optional[list[dict]] = None,
+    ) -> str:
+        """Create a persistent goal Hermes can track across conversations and restarts."""
+        return await self._request("POST", "/agent/goals", payload={
+            "title": title, "description": description, "priority": priority,
+            "target_date": target_date, "milestones": milestones or [],
+        })
+
+    async def list_personal_goals(self, status: str = "active", limit: int = 50) -> str:
+        """List persistent goals by active, paused, completed, archived, or all status."""
+        return await self._request("GET", "/agent/goals", params={"status": status, "limit": limit})
+
+    async def get_personal_goal(self, goal_id: str) -> str:
+        """Get one goal, its milestones, and its linked mission plan."""
+        return await self._request("GET", f"/agent/goals/{goal_id}")
+
+    async def update_personal_goal(
+        self, goal_id: str, progress: Optional[int] = None, status: Optional[str] = None,
+        target_date: Optional[str] = None, milestones: Optional[list[dict]] = None, note: str = "",
+    ) -> str:
+        """Update progress, status, target date, milestones, or a timeline note for a goal."""
+        payload = {"goal_id": goal_id, "note": note}
+        if progress is not None:
+            payload["progress"] = progress
+        if status is not None:
+            payload["status"] = status
+        if target_date is not None:
+            payload["target_date"] = target_date
+        if milestones is not None:
+            payload["milestones"] = milestones
+        return await self._request("POST", "/agent/goals/update", payload=payload)
+
+    async def archive_personal_goal(self, goal_id: str, confirmed: bool = False) -> str:
+        """Archive one goal after explicit owner confirmation."""
+        return await self._request("POST", "/agent/goals/archive", payload={"goal_id": goal_id, "confirmed": confirmed})
+
+    async def draft_personal_mission(
+        self, title: str, outcome: str, workstreams: list[dict], constraints: str = "",
+        priority: int = 4, target_date: Optional[str] = None,
+    ) -> str:
+        """Draft a persistent multi-workstream mission; each workstream names a specialist role and executable steps."""
+        return await self._request("POST", "/agent/missions", payload={
+            "title": title, "outcome": outcome, "workstreams": workstreams,
+            "constraints": constraints, "priority": priority, "target_date": target_date,
+        })
+
+    async def approve_personal_mission(
+        self, goal_id: str, confirmed: bool = False, notify: bool = True, max_attempts: int = 1,
+    ) -> str:
+        """Explicitly approve and queue a previously drafted personal mission."""
+        return await self._request("POST", "/agent/missions/approve", payload={
+            "goal_id": goal_id, "confirmed": confirmed, "notify": notify, "max_attempts": max_attempts,
+        })
+
+    async def request_owner_approval(
+        self, title: str, summary: str, category: str = "general",
+        details: Optional[dict] = None, expires_minutes: int = 60,
+    ) -> str:
+        """Create a visible owner decision request; approval records a decision and never auto-executes the action."""
+        return await self._request("POST", "/agent/approvals", payload={
+            "category": category, "title": title, "summary": summary,
+            "details": details or {}, "expires_minutes": expires_minutes,
+        })
+
+    async def list_owner_approvals(self, status: str = "pending", limit: int = 50) -> str:
+        """List owner approval requests and their current state."""
+        return await self._request("GET", "/agent/approvals", params={"status": status, "limit": limit})
+
+    async def resolve_owner_approval(self, approval_id: str, decision: str, confirmed: bool = False) -> str:
+        """Approve or reject a request after confirmation; this does not execute its proposed action."""
+        return await self._request("POST", "/agent/approvals/resolve", payload={
+            "approval_id": approval_id, "decision": decision, "confirmed": confirmed,
+        })
+
+    async def create_agent_routine(
+        self, name: str, steps: list[dict], description: str = "",
+        schedule_type: str = "on_demand", schedule: Optional[dict] = None, notify: bool = True,
+    ) -> str:
+        """Create a disabled recurring-routine draft; it cannot run until separately enabled."""
+        return await self._request("POST", "/agent/routines", payload={
+            "name": name, "description": description, "schedule_type": schedule_type,
+            "schedule": schedule or {}, "steps": steps, "notify": notify,
+        })
+
+    async def list_agent_routines(self, status: str = "", limit: int = 50) -> str:
+        """List persistent on-demand, interval, daily, and weekly routines."""
+        return await self._request("GET", "/agent/routines", params={"status": status, "limit": limit})
+
+    async def control_agent_routine(self, routine_id: str, action: str, confirmed: bool = False) -> str:
+        """Enable, pause, archive, or run a routine now after explicit owner confirmation."""
+        return await self._request("POST", "/agent/routines/control", payload={
+            "routine_id": routine_id, "action": action, "confirmed": confirmed,
+        })
+
+    async def save_operator_preference(self, key: str, value: str, category: str = "general") -> str:
+        """Save an explicit non-secret preference in the owner's personal operating manual."""
+        return await self._request("POST", "/agent/manual", payload={"key": key, "value": value, "category": category})
+
+    async def get_operator_manual(self, category: str = "") -> str:
+        """Read preferences the owner explicitly asked Hermes to remember."""
+        return await self._request("GET", "/agent/manual", params={"category": category})
+
+    async def delete_operator_preference(self, key: str, confirmed: bool = False) -> str:
+        """Delete a personal operating preference after explicit confirmation."""
+        return await self._request("POST", "/agent/manual/delete", payload={"key": key, "confirmed": confirmed})
+
+    async def list_agent_skills(self) -> str:
+        """List Hermes core, optional, and integration skills and connection requirements."""
+        return await self._request("GET", "/agent/skills")
+
+    async def set_agent_skill_enabled(self, skill_id: str, enabled: bool, confirmed: bool = False) -> str:
+        """Enable or disable a non-core skill after explicit confirmation."""
+        return await self._request("POST", "/agent/skills", payload={
+            "skill_id": skill_id, "enabled": enabled, "confirmed": confirmed,
+        })
+
+    async def get_current_workspace_context(
+        self, include_recent_files: bool = True, save_snapshot: bool = False,
+    ) -> str:
+        """Inspect open windows, managed pages, and recent file metadata on explicit request; does not capture screen pixels or file contents."""
+        return await self._request("GET", "/agent/context", params={
+            "include_recent_files": include_recent_files, "save_snapshot": save_snapshot,
+        })
+
+    async def get_proactive_briefing(self) -> str:
+        """Show pending decisions, deadlines, stale goals, and failed tasks without taking automatic action."""
+        return await self._request("GET", "/agent/briefing")
+
+    async def get_personal_timeline(self, limit: int = 50) -> str:
+        """Read the metadata-only timeline of goals, missions, approvals, routines, and preferences."""
+        return await self._request("GET", "/agent/timeline", params={"limit": limit})
+
+    async def get_personal_command_center(self) -> str:
+        """Get one dashboard of goals, tasks, approvals, routines, safety state, and suggestions."""
+        return await self._request("GET", "/agent/command-center")

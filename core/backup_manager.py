@@ -13,7 +13,7 @@ import zipfile
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
-from platform_support import PROJECT_ROOT, openwebui_data_dir
+from platform_support import DATA_DIR, PROJECT_ROOT, openwebui_data_dir
 
 
 HOME = Path.home()
@@ -21,10 +21,11 @@ PROJECT = PROJECT_ROOT
 BACKUP_DIR = HOME / ".local/share/hermes/backups"
 OPENWEBUI_DB = openwebui_data_dir() / "webui.db"
 OPENWEBUI_VECTOR_DB = openwebui_data_dir() / "vector_db/chroma.sqlite3"
-TASK_DB = HOME / ".local/share/hermes/tasks.db"
-MEMORY_DB = HOME / ".local/share/hermes/memory.db"
-PLAN_DB = HOME / ".local/share/hermes/plans.db"
-GOVERNANCE_DB = HOME / ".local/share/hermes/governance.db"
+TASK_DB = DATA_DIR / "tasks.db"
+MEMORY_DB = DATA_DIR / "memory.db"
+PLAN_DB = DATA_DIR / "plans.db"
+GOVERNANCE_DB = DATA_DIR / "governance.db"
+AGENT_DB = DATA_DIR / "agent.db"
 KEEP_BACKUPS = 14
 GPG_RECIPIENT = os.environ.get("HERMES_BACKUP_GPG_RECIPIENT", "").strip()
 CONFIG_FILES = sorted({
@@ -115,6 +116,7 @@ def create_backup() -> dict:
             (MEMORY_DB, "memory.db"),
             (PLAN_DB, "plans.db"),
             (GOVERNANCE_DB, "governance.db"),
+            (AGENT_DB, "agent.db"),
         ):
             if source.is_file():
                 snapshot = temporary / name
@@ -122,7 +124,7 @@ def create_backup() -> dict:
                 databases.append(snapshot)
         manifest = {
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "version": "alpha",
+            "version": "8.0.0",
             "hostname": os.uname().nodename,
             "git_head": command_output(["git", "-C", str(PROJECT), "rev-parse", "HEAD"]),
             "user_services": command_output(["systemctl", "--user", "is-active", "hermes-action-bridge.service", "hermes-documents.service", "open-webui.service"]),

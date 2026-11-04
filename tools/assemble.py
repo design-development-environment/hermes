@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED_MODULES = (
-    'app.py', 'automation.py', 'bootstrap_openwebui.py', 'cdp_client.py',
+    'agent_control.py', 'app.py', 'automation.py', 'bootstrap_openwebui.py', 'cdp_client.py',
     'codebase_control.py', 'file_ops.py', 'governance_control.py',
     'hermes_health_monitor.py', 'hermes_tools.py', 'managed_browser_launcher.py',
     'memory_control.py', 'model_runtime.py', 'openwebui_tool.py',

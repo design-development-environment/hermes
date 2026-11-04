@@ -143,6 +143,7 @@ class BackupTests(unittest.TestCase):
             "MEMORY_DB": backup_manager.MEMORY_DB,
             "PLAN_DB": backup_manager.PLAN_DB,
             "GOVERNANCE_DB": backup_manager.GOVERNANCE_DB,
+            "AGENT_DB": backup_manager.AGENT_DB,
             "CONFIG_FILES": backup_manager.CONFIG_FILES,
             "PRIVATE_CONFIG_FILES": backup_manager.PRIVATE_CONFIG_FILES,
         }
@@ -153,13 +154,14 @@ class BackupTests(unittest.TestCase):
         backup_manager.MEMORY_DB = root / "memory.db"
         backup_manager.PLAN_DB = root / "plans.db"
         backup_manager.GOVERNANCE_DB = root / "governance.db"
+        backup_manager.AGENT_DB = root / "agent.db"
         config = root / "config.txt"
         config.write_text("safe config", encoding="utf-8")
         backup_manager.CONFIG_FILES = [config]
         private_config = root / "private.env"
         private_config.write_text("SECRET=test", encoding="utf-8")
         backup_manager.PRIVATE_CONFIG_FILES = [private_config]
-        for database in (backup_manager.OPENWEBUI_DB, backup_manager.OPENWEBUI_VECTOR_DB, backup_manager.TASK_DB, backup_manager.MEMORY_DB, backup_manager.PLAN_DB, backup_manager.GOVERNANCE_DB):
+        for database in (backup_manager.OPENWEBUI_DB, backup_manager.OPENWEBUI_VECTOR_DB, backup_manager.TASK_DB, backup_manager.MEMORY_DB, backup_manager.PLAN_DB, backup_manager.GOVERNANCE_DB, backup_manager.AGENT_DB):
             with sqlite3.connect(database) as db:
                 db.execute("CREATE TABLE sample(value TEXT)")
                 db.execute("INSERT INTO sample VALUES('ok')")
@@ -179,7 +181,7 @@ class BackupTests(unittest.TestCase):
             self.assertIn("data/chroma.sqlite3", archive.namelist())
             self.assertIn("private/private.env", archive.namelist())
             manifest = json.loads(archive.read("manifest.json"))
-        self.assertEqual(manifest["version"], "alpha")
+            self.assertEqual(manifest["version"], "8.0.0")
 
 
 if __name__ == "__main__":

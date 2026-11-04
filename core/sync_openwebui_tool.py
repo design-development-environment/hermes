@@ -88,8 +88,9 @@ def main():
         owner = db.execute("SELECT id FROM user ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at LIMIT 1").fetchone()
         if owner is None:
             raise RuntimeError("Open WebUI has no owner yet; create the first account, then run this sync again")
-        row = db.execute("SELECT specs FROM tool WHERE id=?", ("hermes_v4",)).fetchone()
-        specs = json.loads(row[0]) if row and row[0] else generated_specs()
+        # Rebuild schemas from the canonical source on every sync.  Reusing an
+        # older database copy made newly added Hermes capabilities invisible.
+        specs = generated_specs()
         specs = [item for item in specs if item.get("name") != "get_live_voice_status"]
 
         def put(spec):

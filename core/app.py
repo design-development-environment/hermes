@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hermes Alpha local computer, memory, planning, and safety bridge."""
+"""Hermes V8 local computer and persistent personal-agent bridge."""
 
 import os
 import json
@@ -24,6 +24,7 @@ from memory_control import router as memory_router
 from planning_control import router as planning_router
 from governance_control import action_permitted, router as governance_router
 from graphical_control import router as graphical_router
+from agent_control import router as agent_router, start_agent_worker, stop_agent_worker
 from model_runtime import configure_vision, public_status
 from platform_support import PROJECT_ROOT, platform_status
 
@@ -34,14 +35,18 @@ MAX_READ_BYTES = 1_000_000
 @asynccontextmanager
 async def lifespan(_app):
     start_task_worker()
-    yield
-    stop_task_worker()
+    start_agent_worker()
+    try:
+        yield
+    finally:
+        stop_agent_worker()
+        stop_task_worker()
 
 
 app = FastAPI(
-    title="Hermes Alpha Computer Action Bridge",
-    description="Authenticated Hermes desktop, smart routing, memory, planning, safety, coding, browser, and task tools.",
-    version="alpha",
+    title="Hermes V8 Personal Agent Bridge",
+    description="Authenticated Hermes goals, missions, routines, desktop, browser, coding, memory, planning, and safety tools.",
+    version="8.0.0",
     lifespan=lifespan,
 )
 app.include_router(computer_router)
@@ -53,6 +58,7 @@ app.include_router(memory_router)
 app.include_router(planning_router)
 app.include_router(governance_router)
 app.include_router(graphical_router)
+app.include_router(agent_router)
 AUDIT_LOG = BASE / "logs" / "actions.jsonl"
 AUDIT_MAX_BYTES = 5_000_000
 AUDIT_RETAIN = 5
@@ -154,8 +160,8 @@ def desktop_command(*args: str) -> str:
 def health():
     return {
         "status": "ok",
-        "service": "Hermes Alpha Computer Action Bridge",
-        "version": "alpha",
+        "service": "Hermes V8 Personal Agent Bridge",
+        "version": "8.0.0",
         "platform": platform_status(),
     }
 

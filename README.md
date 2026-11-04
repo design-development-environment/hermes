@@ -16,7 +16,7 @@
 
 ## A conversation that can get things done
 
-Ask Hermes to find a file, revise a project, open a browser, draft a document, or check the status of a task. Open WebUI provides the conversation. Hermes supplies authenticated local tools for files, code, browser pages, memory, planning, and computer actions. Your chosen cloud providers supply language, vision, speech recognition, and spoken replies.
+Ask Hermes to pursue a goal, coordinate a multi-step mission, run an approved routine, find a file, revise a project, open a browser, draft a document, or check progress. Open WebUI provides the conversation. Hermes supplies authenticated local tools plus persistent goals, approvals, memory, planning, and computer actions. Your chosen cloud providers supply language, vision, speech recognition, and spoken replies.
 
 Hermes is designed for one owner and one machine. It runs locally as an action bridge and keeps its private data on that machine. The current cloud edition does not install Ollama or local model weights. Requests to cloud models and optional voice services leave your computer; screen images sent for cloud vision do too.
 
@@ -28,6 +28,7 @@ Hermes is designed for one owner and one machine. It runs locally as an action b
 | Files and code | Read, create, edit, search, review, and organize permitted paths and projects |
 | Browser | Web reading and a managed Chromium browser with page actions |
 | Desktop | Screenshots, apps, windows, keyboard, and pointer where the operating system grants access |
+| Personal agent | Persistent goals, missions, approvals, routines, briefings, timeline, skills, and command center |
 | Workflows | Plans, background tasks, progress, memory, recovery, backups, and audit records |
 | Remote access | Optional Tailscale access to the local web interface |
 | Voice | Deepgram input and ElevenLabs output when configured in Open WebUI |
@@ -64,7 +65,7 @@ Read the [Windows preview guide](platforms/windows/README-WINDOWS.md) or [Mac pr
 ```text
 Your device ── Open WebUI ── Cloud model
                    │
-                   └── Hermes tool bridge ── Files, apps, browser, memory, tasks
+                   └── Hermes tool bridge ── Goals, files, apps, browser, memory, tasks
                                 │
                                 └── Your computer's operating system
 ```
@@ -74,7 +75,7 @@ Open WebUI sends a tool call to Hermes through a local authenticated endpoint. T
 ## Source layout
 
 ```text
-core/                 Canonical Linux application and 22 modules shared by all editions
+core/                 Canonical Linux application and shared cross-platform modules
 packaging/            Linux .deb wizard, branding, and Debian package builder
 platforms/windows/    Windows runtime, desktop adapter, setup wizard, and NSIS packaging
 platforms/macos/      Mac runtime, desktop adapter, setup wizard, and app packaging

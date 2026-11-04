@@ -16,7 +16,7 @@ PACKAGING = Path(__file__).resolve().parent
 SOURCE = PACKAGING.parent / 'core'
 DESKTOP = Path.home() / 'Desktop'
 FILES = [
-    'app.py', 'automation.py', 'backup_manager.py', 'bootstrap_openwebui.py',
+    'agent_control.py', 'app.py', 'automation.py', 'backup_manager.py', 'bootstrap_openwebui.py',
     'browser_control.py', 'cdp_client.py', 'codebase_control.py',
     'computer_control.py', 'desktop.py', 'file_ops.py', 'governance_control.py',
     'graphical_control.py', 'hermes_health_monitor.py', 'hermes_tools.py',
