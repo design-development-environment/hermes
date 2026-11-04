@@ -10,6 +10,7 @@ import platform_commands as subprocess
 import threading
 import time
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -59,14 +60,19 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def connect() -> sqlite3.Connection:
+@contextmanager
+def connect():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     os.chmod(DATA_DIR, 0o700)
     connection = sqlite3.connect(DATABASE, timeout=15)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA journal_mode=WAL")
     connection.execute("PRAGMA foreign_keys=ON")
-    return connection
+    try:
+        with connection:
+            yield connection
+    finally:
+        connection.close()
 
 
 def initialize_database(*, recover_running: bool = False):

@@ -8,6 +8,7 @@ import os
 import re
 import sqlite3
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -25,13 +26,18 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+@contextmanager
 def connect():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     os.chmod(DATA_DIR, 0o700)
     db = sqlite3.connect(DATABASE, timeout=15)
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA journal_mode=WAL")
-    return db
+    try:
+        with db:
+            yield db
+    finally:
+        db.close()
 
 
 def initialize_memory():

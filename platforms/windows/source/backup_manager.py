@@ -10,6 +10,7 @@ import sqlite3
 import windows_commands as subprocess
 import tempfile
 import zipfile
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 from platform_support import PROJECT_ROOT, openwebui_data_dir
@@ -48,8 +49,9 @@ PRIVATE_CONFIG_FILES = sorted({
 
 
 def sqlite_snapshot(source: Path, destination: Path):
-    with sqlite3.connect(source, timeout=30) as source_db, sqlite3.connect(destination) as destination_db:
+    with closing(sqlite3.connect(source, timeout=30)) as source_db, closing(sqlite3.connect(destination)) as destination_db:
         source_db.backup(destination_db)
+        destination_db.commit()
 
 
 def command_output(command: list[str]) -> str:

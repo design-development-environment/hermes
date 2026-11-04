@@ -50,7 +50,7 @@ def xdg_user_directory(name):
         return (Path.home() / ('Downloads' if name == 'DOWNLOAD' else name.title())).resolve()
 
 def writable_roots():
-    return tuple(xdg_user_directory(n) for n in ('DESKTOP','DOCUMENTS','DOWNLOAD','PICTURES','MUSIC','VIDEOS')) + (PROJECT_ROOT,)
+    return tuple(xdg_user_directory(n).expanduser().resolve() for n in ('DESKTOP','DOCUMENTS','DOWNLOAD','PICTURES','MUSIC','VIDEOS')) + (PROJECT_ROOT.resolve(),)
 
 def openwebui_data_dir():
     return DATA_DIR / 'open-webui'
