@@ -60,7 +60,12 @@ def read_file(path):
         )
 
     try:
-        print(path.read_text(encoding="utf-8"), end="")
+        # Bound the actual read as well: a file may grow after stat().
+        with path.open('rb') as stream:
+            data = stream.read(MAX_READ_BYTES + 1)
+        if len(data) > MAX_READ_BYTES:
+            sys.exit(f"Maximum per read is {MAX_READ_BYTES} bytes.")
+        print(data.decode('utf-8'), end="")
     except UnicodeDecodeError:
         sys.exit("File is not UTF-8 text; refusing to display binary content.")
     except PermissionError:
@@ -86,7 +91,9 @@ def write_file(path, content, overwrite, parents):
         if answer != "REPLACE":
             sys.exit("Cancelled.")
 
-    path.write_text(content, encoding="utf-8")
+    # Exclusive creation prevents a concurrent writer from being overwritten.
+    with path.open('w' if overwrite else 'x', encoding='utf-8') as stream:
+        stream.write(content)
     print(f"{'Updated' if overwrite else 'Created'}: {path}")
 
 
@@ -147,7 +154,8 @@ def main():
                 args.overwrite, args.parents,
             )
         elif args.action == "delete":
-            delete_file(resolve_path(args.path))
+            # Preserve the final symlink so deletion unlinks it, not its target.
+            delete_file(Path(os.path.abspath(os.path.expanduser(args.path))))
     except PermissionError:
         sys.exit("Permission denied. No elevated permissions were attempted.")
     except OSError as exc:
