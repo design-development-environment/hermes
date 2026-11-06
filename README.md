@@ -17,7 +17,7 @@ computer-control tokens, chats, or Host data. See [the Host and User guide](HOST
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.0.5-0d0d0d">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.0.6-0d0d0d">
   <img alt="Platforms" src="https://img.shields.io/badge/platforms-Linux%20%C2%B7%20Windows%20%C2%B7%20macOS-0d0d0d">
   <img alt="AI" src="https://img.shields.io/badge/AI-cloud-0d0d0d">
 </p>
@@ -112,7 +112,7 @@ make. Back up a test computer before trying a new installer.
 ---
 
 <p align="center">
-  <strong>Hermes 2.0.5</strong><br>
+  <strong>Hermes 2.0.6</strong><br>
   Highly Efficient Real-time Machine for Everyday Support.<br><br>
   Created by Anshul & Miheer
 </p>

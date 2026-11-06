@@ -39,10 +39,12 @@ jobs:
           python -m pip install -r core/requirements-hermes.lock httpx2==2.16.0
           python -m unittest discover -s core -p 'test_*.py' -q
           PYTHONPATH=client python -m unittest discover -s client -p 'test_*.py' -q
+          python -m unittest discover -s packaging -p 'test_*.py' -q
       - name: Build Debian installer
         run: |
           python packaging/build_user_deb.py --architecture ${{ matrix.arch }} --output dist/Hermes-user-Linux-${{ matrix.arch }}.deb
           python packaging/build_deb.py --architecture ${{ matrix.arch }} --output dist/Hermes-setup-Linux-${{ matrix.arch }}.deb
+          python packaging/verify_deb_pair.py dist/Hermes-setup-Linux-${{ matrix.arch }}.deb dist/Hermes-user-Linux-${{ matrix.arch }}.deb
           sha256sum dist/Hermes-*-Linux-${{ matrix.arch }}.deb | sed 's#  dist/#  #' > dist/SHA256SUMS-linux-${{ matrix.arch }}.txt
       - uses: actions/upload-artifact@v4
         with:
@@ -222,7 +224,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && github.event.head_commit.message == 'Release Hermes 2.0.5 quality of life improvements')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'Release Hermes '))
     needs: [linux, windows, macos]
     runs-on: ubuntu-24.04
     permissions:
@@ -240,10 +242,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [[ "$GITHUB_REF_TYPE" == branch ]]; then
-            [[ "$(cat VERSION)" == 2.0.5 ]]
-            gh release create v2.0.5 release-assets/* --target "$GITHUB_SHA" --title "Hermes 2.0.5 — Quality of life improvements" --notes-file RELEASE_NOTES.md --repo "$GITHUB_REPOSITORY"
-          elif gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
+            tag="v$(cat VERSION)"
           else
-            gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --title "Hermes ${GITHUB_REF_NAME#v}" --notes-file RELEASE_NOTES.md --repo "$GITHUB_REPOSITORY"
+            tag="$GITHUB_REF_NAME"
+          fi
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$tag" release-assets/* --target "$GITHUB_SHA" --title "Hermes ${tag#v}" --notes-file RELEASE_NOTES.md --repo "$GITHUB_REPOSITORY"
           fi

@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw, ImageTk
 PAYLOAD = Path('/opt/hermes/payload')
 ROOT = Path.home() / 'hermes-v4'
 ASKPASS = '/opt/hermes/askpass.sh'
-VERSION = '2.0.5'
+VERSION = '2.0.6'
 
 
 class SummaryCard(tk.Canvas):
@@ -470,12 +470,28 @@ class Setup(tk.Tk):
     def check(self):
         self.command(['python3', '/opt/hermes/hermes-setup-check'], self.complete)
 
+    def open_user(self):
+        self.status.set('Hermes User is installed')
+        subprocess.Popen(['/usr/bin/hermes-user'])
+        self.render()
+
+    def install_user(self):
+        launcher = Path('/usr/bin/hermes-user-install')
+        if Path('/usr/bin/hermes-user').is_file():
+            self.open_user()
+        elif launcher.is_file():
+            # Keep the package transaction in this window. A failure is then
+            # visible to the person installing Hermes instead of disappearing
+            # behind a detached Polkit prompt.
+            self.command([str(launcher)], self.open_user)
+        else:
+            self.dialog('Hermes User unavailable', 'The bundled Hermes User installer is missing. Reinstall Hermes Setup.')
+
     def complete(self):
         self.marker.parent.mkdir(parents=True, exist_ok=True)
         self.marker.write_text('Verified installation\n')
         self.go(6)
-        if Path('/usr/bin/hermes-user-install').is_file():
-            self.after(400, lambda: subprocess.Popen(['/usr/bin/hermes-user-install']))
+        self.after(400, self.install_user)
 
     def advance(self):
         if self.step == 0:
@@ -491,7 +507,7 @@ class Setup(tk.Tk):
         elif self.step == 5:
             self.check()
         else:
-            webbrowser.open('http://127.0.0.1:3000')
+            self.install_user()
 
     def render(self):
         pages = [
@@ -501,12 +517,12 @@ class Setup(tk.Tk):
             ('Cloud accounts', 'In Open WebUI Admin Settings → Connections, add an OpenAI-compatible connection using https://integrate.api.nvidia.com/v1, Bearer authentication, your NVIDIA key, and Chat Completions. In Audio settings, add Deepgram for speech recognition and ElevenLabs for spoken replies if wanted. Test a chat with each Hermes model before continuing.', 'Continue'),
             ('Remote access and startup', 'Connect Tailscale using the button below and approve its sign-in link. Then enable Tailscale Serve. Choose whether the desktop logs in automatically at boot.', 'Apply startup choice'),
             ('Final check', 'This rechecks this machine. Test a chat, file read, browser action, screenshot, voice and phone access in Open WebUI before relying on Hermes remotely.', 'Run check'),
-            ('Hermes Host is installed', 'Hermes services are set to start at boot. The matching Hermes User installer has opened for this computer. Install Hermes User on another Tailscale-connected computer to access this Host, then sign in through Open WebUI. Desktop control requires an active unlocked desktop session.', 'Open Hermes'),
+            ('Hermes Host is installed', 'Hermes services are set to start at boot. Hermes User installs locally now; its progress and any error remain visible here. Install the matching User package on another Tailscale-connected computer to access this Host remotely. Desktop control requires an active unlocked desktop session.', 'Install Hermes User'),
         ]
         title, body, button = pages[self.step]
         self.toolbar_title.configure(text=f'Hermes Installer   ·   {self.step+1} of 7')
         if self.step == 6:
-            button = 'Open Hermes'
+            button = 'Open Hermes User' if Path('/usr/bin/hermes-user').is_file() else 'Install Hermes User'
         for index, label in enumerate(self.steps):
             label.set_state(index == self.step, index < self.step)
         summaries = [

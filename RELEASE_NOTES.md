@@ -1,9 +1,7 @@
-# Hermes 2.0.5 — Quality of life improvements
+# Hermes 2.0.6 — Linux installation reliability
 
-- Windows setup starts through a graphical launcher and keeps background command output in the wizard. Host and User now have distinct Start menu shortcuts.
-- Windows looks for Tailscale in its standard directory and on PATH, limits the login wait, then enables Serve after successful login.
-- Windows and macOS reopen the setup wizard after an incomplete installation. Completed setups continue through the upgrade path.
-- macOS bootstrap uses a graphical Python download prompt and writes diagnostics to ~/Library/Logs/Hermes/setup.log.
-- Linux Host installs its bundled User package using the same filename the builder produces.
-- Windows uninstall waits for Hermes processes to exit. The User uninstaller reports a locked runtime so the owner can close the app and retry.
-- Host and User application icons use rounded Hermes artwork.
+- Fixed the Debian Host/User package collision: each now owns a separate app-icon path, so the User app installs normally after Hermes Setup.
+- Hermes Setup now runs the bundled User installation in its own visible progress view. Success opens Hermes User; any failure stays visible in the installer instead of being lost behind a background authorization prompt.
+- Added a release gate that reads both generated Debian package manifests and fails the build if they own any overlapping files.
+- A broken unrelated third-party APT source no longer stops Hermes before dependency installation. Hermes retains normal APT signature protection and uses only existing trusted package metadata when refresh fails.
+- Release automation is tag-driven, so every published version builds and releases the exact tagged source without a manually edited version condition.

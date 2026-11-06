@@ -81,6 +81,19 @@ run_privileged() {
   fi
 }
 
+# A broken third-party APT source must not prevent a Hermes install. We never
+# weaken signature validation or alter the user's repositories; if refresh
+# fails, APT retains its last known trusted package lists and the following
+# installation step remains the authoritative success/failure check.
+refresh_package_lists() {
+  if run_privileged apt-get update; then
+    return 0
+  fi
+  echo "Warning: APT refresh failed, usually because an unrelated third-party repository is misconfigured." >&2
+  echo "Hermes will continue using existing trusted package metadata. Fix that repository after setup if a required package is unavailable." >&2
+  return 0
+}
+
 # Node.js is useful for optional coding workflows, but package names and versions
 # differ across supported Debian-family distributions. It must never block the
 # Hermes runtime installation.
@@ -88,7 +101,7 @@ PACKAGES=(python3 python3-venv python3-pip ca-certificates curl bubblewrap xdg-u
 if ((HEADLESS == 0)); then
   PACKAGES+=(libnotify-bin wmctrl xdotool)
 fi
-run_privileged apt-get update
+refresh_package_lists
 run_privileged apt-get install -y "${PACKAGES[@]}"
 if ((HEADLESS == 0)); then
   OPTIONAL_DESKTOP_PACKAGES=()

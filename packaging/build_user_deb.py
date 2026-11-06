@@ -48,7 +48,9 @@ def build(architecture: str, output: Path) -> Path:
             copy(ROOT / f"packaging/branding/hermes-{mode}.svg", root / f"opt/hermes-user/desktop/hermes-{mode}.svg")
         copy(CLIENT / "hermes-user", root / "usr/bin/hermes-user", 0o755)
         copy(CLIENT / "hermes-user.desktop", root / "usr/share/applications/hermes-user.desktop")
-        copy(ROOT / "packaging/branding/icon-dark.png", root / "usr/share/icons/hicolor/1024x1024/apps/hermes.png")
+        # The Host owns "hermes.png". The User must have its own desktop
+        # icon path so both Debian packages can be installed together.
+        copy(ROOT / "packaging/branding/icon-dark.png", root / "usr/share/icons/hicolor/1024x1024/apps/hermes-user.png")
         control = root / "DEBIAN/control"
         control.parent.mkdir(parents=True)
         control.write_text(f"""Package: hermes-user

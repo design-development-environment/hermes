@@ -1,6 +1,6 @@
 # Release checklist
 
-## Hermes 2.0.5 — Quality of life improvements
+## Hermes 2.0.6 — Quality of life improvements
 
 See RELEASE_NOTES.md for the installer changes.
 

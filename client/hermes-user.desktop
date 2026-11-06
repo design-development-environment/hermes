@@ -3,6 +3,6 @@ Type=Application
 Name=Hermes User
 Comment=Connect securely to a Hermes Host
 Exec=hermes-user
-Icon=hermes
+Icon=hermes-user
 Terminal=false
 Categories=Utility;Network;

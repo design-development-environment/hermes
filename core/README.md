@@ -1,6 +1,6 @@
-# Hermes 2.0.5
+# Hermes 2.0.6
 
-Hermes 2.0.5 serves chat through Open WebUI with three cloud model presets and
+Hermes 2.0.6 serves chat through Open WebUI with three cloud model presets and
 uses one authenticated local Workspace Tool for desktop, managed-browser, coding,
 terminal, file, document, backup, and persistent background-task actions. Open
 WebUI is available through Tailscale Serve. The Open WebUI Workspace Tool is the
