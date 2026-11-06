@@ -2,18 +2,18 @@
   <img src="packaging/branding/hermes-dark.svg" alt="Hermes" width="280">
 </p>
 
-## 2.0: Host and User
+## Hermes 2.0 — Host and User
 
-Hermes now has a **Host** installer for the computer it controls and a
-lightweight **User** installer for remote computers. The User app connects
-only through Tailscale and opens the ordinary Open WebUI login; it never holds
-your model keys, computer-control token, chats or Host data. See
-[the Host and User guide](HOST_USER.md).
+Hermes 2 is the official split-platform release. Install **Hermes Setup** on
+the computer Hermes should control. Install **Hermes User** on another device
+when you want to reach that Host privately through Tailscale. The User app
+opens the normal Open WebUI sign-in page and never receives provider keys,
+computer-control tokens, chats, or Host data. See [the Host and User guide](HOST_USER.md).
 
 <h1 align="center">Your computer. Ready to help.</h1>
 
 <p align="center">
-  A cloud-powered personal AI that can understand, plan and act on your computer.
+  A cloud-powered personal AI that can understand, plan, and act on your computer.
 </p>
 
 <p align="center">
@@ -31,6 +31,19 @@ Hermes combines a cloud AI model with secure tools running on your own computer.
 ```text
 You → Open WebUI → Cloud AI → Hermes tools → Your computer
 ```
+
+### Three focused presets
+
+The model picker intentionally shows only these three Hermes presets:
+
+| Preset | Best for |
+|---|---|
+| **Hermes Alpha** | Deep reasoning and complex computer workflows |
+| **Hermes Beta** | A balanced everyday assistant |
+| **Hermes Gamma** | Fast, lightweight requests |
+
+Your cloud-provider connection can contain more underlying models, but Hermes
+keeps the everyday picker focused on Alpha, Beta, and Gamma.
 
 ## What it can do
 
@@ -56,15 +69,29 @@ Open the repository's **[Releases](https://github.com/design-development-environ
 
 API keys and personal data are never included in releases. Unsigned test builds may show a Windows SmartScreen or macOS Gatekeeper confirmation.
 
+### Which installer do I need?
+
+| If you want to… | Download |
+|---|---|
+| Let Hermes control this computer | **Hermes Setup** |
+| Use a different device to connect to an existing Host | **Hermes User** |
+
+For a remote device: sign both devices into the same Tailscale network, enter
+the Host’s `.ts.net` address in Hermes User, then sign in with your usual Open
+WebUI username and password. No pairing code or API key is copied to the User device.
+
 ## Inside Hermes
 
 Open WebUI handles conversation. A local authenticated bridge performs approved actions and stores private state. Cloud providers handle language, vision and optional voice. Tailscale can make the web interface reachable only from your private network.
 
-Hermes includes **122 tools** across computer control, managed browsing, documents, coding, memory, planning, backups, workflows and its persistent personal-agent command center.
+Hermes includes tools for computer control, managed browsing, documents,
+coding, memory, planning, backups, workflows, and its persistent personal-agent command center.
 
-## Build
+## Development and releases
 
-Every commit is tested on native Linux, Windows and macOS runners. A version tag builds all installers, verifies their hashes and publishes them to GitHub Releases.
+Every commit is tested on native Linux, Windows, and macOS runners. An official
+version tag builds Host and User installers, verifies their SHA-256 hashes, and
+publishes the results to GitHub Releases.
 
 ```text
 core/                 Shared Hermes engine
@@ -78,7 +105,9 @@ Start with the [Linux guide](core/README.md), [Windows guide](platforms/windows/
 
 ## Privacy
 
-Hermes keeps local databases, tokens, logs, backups and provider keys out of source control. Cloud providers only receive the content needed for requests you make. Back up a test computer before trying a new installer.
+Hermes keeps local databases, tokens, logs, backups, and provider keys out of
+source control. Cloud providers receive only the content needed for requests you
+make. Back up a test computer before trying a new installer.
 
 ---
 
