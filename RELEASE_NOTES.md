@@ -1,33 +1,31 @@
-# Hermes 2.0.3 — resilient cross-platform setup
+# Hermes 2.0.4 — clean Windows first-run
 
-Hermes 2.0.3 fixes the Windows setup failure that appeared after Git had
-already installed successfully.
+Hermes 2.0.4 fixes the two remaining failures reproduced during a clean
+Windows Host installation.
 
 ## Fixed
 
-- A successful Git, Node.js, VS Code, or Tailscale installation no longer fails
-  merely because Windows exposes a different registry display name.
-- Hermes records such a package as usable but not owned, so uninstall keeps it
-  safely instead of guessing.
-- `winget` operations retry transient failures and verify that a reported
-  installation is actually detectable.
-- Git, Node.js, and VS Code are treated as repairable desktop add-ons. A failure
-  in one no longer prevents the core Hermes services from starting.
-- Optional dependency failures are saved in the Hermes data directory for
-  diagnosis and cleared automatically after a successful repair.
-- macOS CI retries intermittent `hdiutil verify` failures before rejecting a
-  valid DMG.
+- Fresh Windows installs now restart the private Python interpreter after the
+  pinned dependency set is installed. This lets Python process pywin32's new
+  path configuration before Hermes imports `win32api`, `win32security`, or
+  `win32com`.
+- The **Apply startup choice** action now creates the Windows startup shortcut
+  in a fresh runtime process. The setup wizard advances normally instead of
+  remaining on the Tailscale and startup page.
+- Partial installations remain repairable by rerunning the same setup action.
+- The lightweight Hermes User regression suite now respects Windows permission
+  semantics while retaining the owner-only mode assertion on POSIX systems.
 
-## Simulated setup states
+## Validation
 
-Automated tests cover pre-existing packages, fresh installs, missing registry
-inventory, unverifiable ownership, package-manager failure, false-success
-installs, changed packages, safe uninstall, partial reruns, lock resolution,
-native platform packaging, and repository credential checks.
+- New Windows regressions verify that first-run configuration and startup
+  shortcut creation are delegated to fresh Python processes.
+- Repository hygiene, dependency locks, shared backend tests, desktop-client
+  tests, and assembled Windows tests run before release publication.
+- Native CI builds and inspects Linux amd64, Linux arm64, Windows x64, and
+  Apple Silicon macOS Host and User packages.
 
-All Hermes 2.0 capabilities remain unchanged. Provider keys, control tokens,
-passwords, chats, databases, and backups are never included in releases.
-
-Unsigned builds may require the normal Windows SmartScreen or macOS Gatekeeper
-confirmation. Clean-machine acceptance testing remains required for each OS;
-software cannot truthfully guarantee every future third-party or hardware error.
+All Hermes 2.0 capabilities remain unchanged. Provider keys, passwords,
+tokens, chats, databases, and backups are not included in release artifacts.
+Unsigned builds may show the normal Windows SmartScreen or macOS Gatekeeper
+warning.

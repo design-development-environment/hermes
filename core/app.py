@@ -46,7 +46,7 @@ async def lifespan(_app):
 app = FastAPI(
     title="Hermes Personal Agent Bridge",
     description="Authenticated Hermes goals, missions, routines, desktop, browser, coding, memory, planning, and safety tools.",
-    version="2.0.3",
+    version="2.0.4",
     lifespan=lifespan,
 )
 app.include_router(computer_router)
@@ -161,7 +161,7 @@ def health():
     return {
         "status": "ok",
         "service": "Hermes Personal Agent Bridge",
-        "version": "2.0.3",
+        "version": "2.0.4",
         "platform": platform_status(),
     }
 

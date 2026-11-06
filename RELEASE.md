@@ -1,15 +1,15 @@
 # Release checklist
 
-## Hermes 2.0.3 — resilient cross-platform setup
+## Hermes 2.0.4 — clean Windows first-run
 
-- Keeps a successful Windows package install successful even when uninstall ownership cannot be proven.
-- Retries transient Windows package-manager and macOS DMG verification failures.
-- Lets the Hermes backend start when optional Windows developer tools need later repair.
-- Exercises absent, existing, fresh, partial, unverifiable and failed dependency states without mutating the test machine.
+- Restarts Python after installing pywin32 before importing Windows modules.
+- Runs startup-shortcut creation outside the long-lived setup UI process.
+- Keeps partial Windows installations safe to retry.
+- Covers the first-run and startup handoff with Windows-native regressions.
 - Keeps separate Hermes Setup and Hermes User installers for every platform.
 
-The private repository builds release installers. A successful CI run proves
-that source checks, platform regressions and native packaging passed. Final
+The repository builds release installers. A successful CI run proves that
+source checks, platform regressions and native packaging passed. Final
 publication still requires clean-machine acceptance testing and signatures.
 
 1. Keep provider keys, chat data, tokens, backups, and local `.env` files out of

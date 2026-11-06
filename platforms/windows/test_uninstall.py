@@ -9,6 +9,7 @@ from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).parent/'source'))
 import windows_dependencies as d
 import windows_runtime as runtime
+import windows_setup
 
 class OwnershipTests(unittest.TestCase):
     def setUp(self):
@@ -111,5 +112,26 @@ class OwnershipTests(unittest.TestCase):
             self.assertTrue(report.is_file())
             runtime.record_optional_failures({})
             self.assertFalse(report.exists())
+
+    def test_install_finishes_in_fresh_python_process(self):
+        with patch.object(runtime,'install_dependencies') as dependencies, \
+             patch.object(runtime.subprocess,'run') as run, \
+             patch.object(runtime,'environment',return_value={'HERMES_ROOT':'test'}) as environment:
+            runtime.install()
+        dependencies.assert_called_once_with()
+        environment.assert_called_once_with()
+        argv=run.call_args.args[0]
+        self.assertEqual(argv[0],str(runtime.PYTHON))
+        self.assertEqual(Path(argv[1]).resolve(),Path(runtime.__file__).resolve())
+        self.assertEqual(argv[2],'finish-install')
+        self.assertTrue(run.call_args.kwargs['check'])
+
+    def test_setup_startup_uses_fresh_python_process(self):
+        setup=object.__new__(windows_setup.WindowsSetup)
+        setup.command=unittest.mock.Mock()
+        setup.startup()
+        argv, callback=setup.command.call_args.args
+        self.assertEqual(argv,[str(runtime.PYTHON),str(runtime.PROJECT_ROOT/'windows_runtime.py'),'startup'])
+        self.assertTrue(callable(callback))
 
 if __name__=='__main__': unittest.main(verbosity=2)

@@ -26,6 +26,7 @@ class HermesClientTests(unittest.TestCase):
                 hermes_client.save_host("https://host.tail.ts.net")
                 self.assertEqual(hermes_client.load_host(), "https://host.tail.ts.net")
                 self.assertEqual(json.loads(hermes_client.CONFIG_FILE.read_text())["host"], "https://host.tail.ts.net")
-                self.assertEqual(hermes_client.CONFIG_FILE.stat().st_mode & 0o777, 0o600)
+                if os.name != "nt":
+                    self.assertEqual(hermes_client.CONFIG_FILE.stat().st_mode & 0o777, 0o600)
             finally:
                 hermes_client.CONFIG_DIR, hermes_client.CONFIG_FILE = previous_dir, previous_file

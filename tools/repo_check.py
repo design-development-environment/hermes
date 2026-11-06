@@ -33,7 +33,7 @@ for platform in ('windows', 'macos'):
         raise SystemExit(f'{platform} duplicates shared modules: {sorted(duplicate)}')
 
 for path in ROOT.rglob('*'):
-    if '.git' in path.parts or 'node_modules' in path.parts or 'dist' in path.parts:
+    if any(part in {'.git','.venv','__pycache__','node_modules','dist'} for part in path.parts):
         continue
     if path.is_symlink():
         raise SystemExit(f'Symlink in source tree: {path.relative_to(ROOT)}')

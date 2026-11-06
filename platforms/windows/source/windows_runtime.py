@@ -70,6 +70,18 @@ def install_dependencies():
     subprocess.run([str(PYTHON),'-m','pip','install','--require-hashes','-r',str(PROJECT_ROOT/'requirements-windows.lock')],check=True)
     subprocess.run([str(PYTHON),'-m','pip','check'],check=True)
 
+def finish_install():
+    """Configure Windows only after dependency .pth files load in this process."""
+    failures=install_desktop_dependencies()
+    prepare()
+    record_optional_failures(failures)
+    startup(); (CONFIG_DIR/'stop').unlink(missing_ok=True); start()
+    for _ in range(180):
+        if all(check_url(p) for p in (3000,8765,8766)):
+            print('Hermes services are ready.',flush=True); return
+        time.sleep(2)
+    raise RuntimeError('Services did not become ready. Open the logs in '+str(DATA_DIR))
+
 def install_desktop_dependencies():
     """Best-effort developer tools; never prevent the Hermes core from starting."""
     from windows_dependencies import install as install_dependency
@@ -166,15 +178,11 @@ def supervise():
 
 def install():
     install_dependencies()
-    failures=install_desktop_dependencies()
-    prepare()
-    record_optional_failures(failures)
-    startup(); (CONFIG_DIR/'stop').unlink(missing_ok=True); start()
-    for _ in range(180):
-        if all(check_url(p) for p in (3000,8765,8766)):
-            print('Hermes services are ready.',flush=True); return
-        time.sleep(2)
-    raise RuntimeError('Services did not become ready. Open the logs in '+str(DATA_DIR))
+    # pip may have installed pywin32 into this environment for the first time.
+    # Its .pth file is processed only when Python starts, so all Windows imports
+    # and startup work must happen in a fresh interpreter.
+    subprocess.run([str(PYTHON),str(Path(__file__).resolve()),'finish-install'],
+                   check=True,env=environment())
 
 def verify():
     failed=[]
@@ -203,6 +211,7 @@ def verify():
 
 if __name__=='__main__':
     try:
-        {'install':install,'upgrade':upgrade,'verify':verify,'supervise':supervise,'start':start}[sys.argv[1]]()
+        {'install':install,'finish-install':finish_install,'upgrade':upgrade,
+         'verify':verify,'supervise':supervise,'start':start,'startup':startup}[sys.argv[1]]()
     except Exception as exc:
         print(str(exc),flush=True); raise
