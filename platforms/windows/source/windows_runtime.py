@@ -70,6 +70,27 @@ def install_dependencies():
     subprocess.run([str(PYTHON),'-m','pip','install','--require-hashes','-r',str(PROJECT_ROOT/'requirements-windows.lock')],check=True)
     subprocess.run([str(PYTHON),'-m','pip','check'],check=True)
 
+def install_desktop_dependencies():
+    """Best-effort developer tools; never prevent the Hermes core from starting."""
+    from windows_dependencies import install as install_dependency
+    failures={}
+    for package in ('Git.Git','OpenJS.NodeJS.LTS','Microsoft.VisualStudioCode'):
+        try:
+            install_dependency(package)
+        except Exception as exc:
+            failures[package]=str(exc)
+            print(f'WARNING: {package} was not installed: {exc}',flush=True)
+    return failures
+
+def record_optional_failures(failures):
+    """Keep a durable repair report without turning optional tools into blockers."""
+    warning=DATA_DIR/'optional-dependencies.json'
+    if failures:
+        warning.write_text(json.dumps(failures,indent=2),encoding='utf-8')
+        print('Hermes will continue. Re-run setup later to repair optional desktop tools.',flush=True)
+    else:
+        warning.unlink(missing_ok=True)
+
 def upgrade():
     """Activate replaced source without resetting data, keys, or presets."""
     prepare()
@@ -77,6 +98,7 @@ def upgrade():
     stop.write_text('upgrade',encoding='utf-8')
     wait_until_stopped()
     install_dependencies()
+    record_optional_failures(install_desktop_dependencies())
     database=openwebui_data_dir()/'webui.db'
     if database.exists():
         from bootstrap_openwebui import readiness
@@ -144,15 +166,10 @@ def supervise():
 
 def install():
     install_dependencies()
-    # Install the desktop development tools using Windows' package manager.
-    import shutil
-    winget=shutil.which('winget')
-    if not winget:
-        raise RuntimeError('Windows App Installer (winget) is required. Install it from Microsoft Store, then retry Hermes setup.')
-    for package in ('Git.Git','OpenJS.NodeJS.LTS','Microsoft.VisualStudioCode'):
-        from windows_dependencies import install as install_dependency
-        install_dependency(package)
-    prepare(); startup(); (CONFIG_DIR/'stop').unlink(missing_ok=True); start()
+    failures=install_desktop_dependencies()
+    prepare()
+    record_optional_failures(failures)
+    startup(); (CONFIG_DIR/'stop').unlink(missing_ok=True); start()
     for _ in range(180):
         if all(check_url(p) for p in (3000,8765,8766)):
             print('Hermes services are ready.',flush=True); return
@@ -179,6 +196,9 @@ def verify():
         print(f'Hermes tools: {len(names)}')
         if not required <= names: failed.append('v8-tools')
     if failed: raise RuntimeError('Verification failed: '+str(failed))
+    warning=DATA_DIR/'optional-dependencies.json'
+    if warning.exists():
+        print('Optional desktop tools still need repair: '+warning.read_text(encoding='utf-8'),flush=True)
     print('Local checks passed. Cloud chat, voice and phone access require your provider keys and hands-on testing.')
 
 if __name__=='__main__':

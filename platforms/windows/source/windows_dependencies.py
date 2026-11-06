@@ -1,4 +1,9 @@
-"""Record ownership only after a proven fresh package installation."""
+"""Install Windows helpers without confusing ownership with availability.
+
+Hermes may remove a dependency only when it can prove that it installed the
+exact unchanged package.  Failure to create that uninstall receipt must never
+turn a successful third-party installation into a failed Hermes setup.
+"""
 import json
 import os
 import re
@@ -11,6 +16,7 @@ STATE=Path(__file__).resolve().parent.parent/'install-state'
 PACKAGES={'Git.Git':r'Git(?: version)? \d.*', 'OpenJS.NodeJS.LTS':r'Node\.js',
           'Microsoft.VisualStudioCode':r'Microsoft Visual Studio Code(?: \(User\))?',
           'Tailscale.Tailscale':r'Tailscale'}
+NOT_FOUND=0x8A150014
 
 def inventory(package):
     import winreg
@@ -44,29 +50,69 @@ def load_receipt(package):
 def eligible(receipt,current):
     return bool(receipt and receipt.get('owned') is True and receipt.get('entries')==current and current)
 
+def code(result):
+    return result.returncode & 0xffffffff
+
+def winget_run(arguments,attempts=3):
+    """Retry transient winget failures while preserving the final exit code."""
+    result=None
+    for attempt in range(attempts):
+        result=subprocess.run(arguments,capture_output=True)
+        if result.returncode==0 or code(result)==NOT_FOUND:
+            return result
+        if attempt+1<attempts:
+            print(f'winget failed (attempt {attempt+1}/{attempts}); retrying...',flush=True)
+    return result
+
+def inspect(package):
+    """Return registry inventory or None when Windows cannot enumerate it."""
+    try:
+        return inventory(package)
+    except (OSError,ValueError) as exc:
+        print(package+': Windows package inventory is unavailable ('+str(exc)+')',flush=True)
+        return None
+
+def save_receipt(package,owned,entries=None,reason=''):
+    STATE.mkdir(parents=True,exist_ok=True)
+    target=STATE/(package+'.json'); temporary=target.with_suffix('.next')
+    receipt={'package':package,'owned':bool(owned),'entries':entries or []}
+    if reason: receipt['reason']=reason
+    temporary.write_text(json.dumps(receipt,indent=2),encoding='utf-8')
+    os.replace(temporary,target)
+
 def install(package):
     if package not in PACKAGES: raise ValueError('Unknown package')
-    before=inventory(package)  # Any inventory error aborts rather than guessing ownership.
+    before=inspect(package)
     if before:
         print(package+': using existing installation',flush=True)
         return
     winget=shutil.which('winget')
     if not winget: raise RuntimeError('Install Windows App Installer (winget), then retry.')
     # No registry match does not prove absence. A successful winget match is also preserved.
-    probe=subprocess.run([winget,'list','--id',package,'--exact','--accept-source-agreements'],capture_output=True)
+    probe=winget_run([winget,'list','--id',package,'--exact','--accept-source-agreements'])
     if probe.returncode==0:
         print(package+': existing package preserved',flush=True); return
     # APPINSTALLER_CLI_ERROR_NO_APPLICATIONS_FOUND. Network/source errors are not absence.
-    if probe.returncode & 0xffffffff != 0x8A150014:
+    if code(probe)!=NOT_FOUND:
         raise RuntimeError('Could not determine whether '+package+' is already installed; retry after fixing winget.')
-    subprocess.run([winget,'install','--id',package,'--exact','--source','winget',
-                    '--accept-package-agreements','--accept-source-agreements'],check=True)
-    after=inventory(package)
-    if not after: raise RuntimeError(package+' installed, but ownership could not be verified; automatic removal will be unavailable.')
-    STATE.mkdir(parents=True,exist_ok=True)
-    target=STATE/(package+'.json'); temporary=target.with_suffix('.next')
-    temporary.write_text(json.dumps({'package':package,'owned':True,'entries':after},indent=2),encoding='utf-8')
-    os.replace(temporary,target)
+    installed=winget_run([winget,'install','--id',package,'--exact','--source','winget',
+                          '--accept-package-agreements','--accept-source-agreements'])
+    if installed.returncode:
+        raise subprocess.CalledProcessError(installed.returncode,installed.args,
+                                            output=installed.stdout,stderr=installed.stderr)
+    after=inspect(package)
+    if after and before==[]:
+        save_receipt(package,True,after)
+        print(package+': installed with verified Hermes ownership',flush=True)
+        return
+    # Registry display names differ between package revisions. Verify actual
+    # availability through winget, then continue without ever claiming removal.
+    verified=winget_run([winget,'list','--id',package,'--exact','--accept-source-agreements'])
+    if verified.returncode:
+        raise RuntimeError(package+' reported a successful install but could not be detected afterward.')
+    reason='installed successfully; automatic removal disabled because ownership could not be proven'
+    save_receipt(package,False,after,reason)
+    print(package+': '+reason,flush=True)
 
 def remove(package):
     if package not in PACKAGES: raise ValueError('Unknown package')

@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw, ImageTk
 PAYLOAD = Path('/opt/hermes/payload')
 ROOT = Path(__file__).resolve().parent
 ASKPASS = '/opt/hermes/askpass.sh'
-VERSION = '2.0.2'
+VERSION = '2.0.3'
 
 
 class SummaryCard(tk.Canvas):

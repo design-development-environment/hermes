@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).parent/'source'))
 import windows_dependencies as d
+import windows_runtime as runtime
 
 class OwnershipTests(unittest.TestCase):
     def setUp(self):
@@ -29,7 +30,7 @@ class OwnershipTests(unittest.TestCase):
     def test_winget_failure_is_not_absence(self):
         with patch.object(d,'inventory',return_value=[]),patch.object(d.shutil,'which',return_value='winget'),patch.object(d.subprocess,'run',return_value=subprocess.CompletedProcess([],1)) as run:
             with self.assertRaises(RuntimeError): d.install(self.package)
-            self.assertEqual(run.call_count,1)
+            self.assertEqual(run.call_count,3)
         self.assertFalse(list(self.state.iterdir()))
 
     def test_fresh_install_recorded(self):
@@ -37,8 +38,31 @@ class OwnershipTests(unittest.TestCase):
             d.install(self.package)
         self.assertTrue(d.eligible(d.load_receipt(self.package),self.entry))
 
+    def test_success_without_registry_receipt_is_nonfatal(self):
+        results=[subprocess.CompletedProcess([],d.NOT_FOUND),subprocess.CompletedProcess([],0),
+                 subprocess.CompletedProcess([],0)]
+        with patch.object(d,'inventory',return_value=[]),patch.object(d.shutil,'which',return_value='winget'),patch.object(d.subprocess,'run',side_effect=results):
+            d.install(self.package)
+        receipt=json.loads((self.state/(self.package+'.json')).read_text())
+        self.assertFalse(receipt['owned'])
+        self.assertIsNone(d.load_receipt(self.package))
+
+    def test_unverifiable_inventory_never_claims_ownership(self):
+        results=[subprocess.CompletedProcess([],d.NOT_FOUND),subprocess.CompletedProcess([],0),
+                 subprocess.CompletedProcess([],0)]
+        with patch.object(d,'inventory',side_effect=OSError('registry unavailable')),patch.object(d.shutil,'which',return_value='winget'),patch.object(d.subprocess,'run',side_effect=results):
+            d.install(self.package)
+        self.assertFalse(json.loads((self.state/(self.package+'.json')).read_text())['owned'])
+
+    def test_success_that_cannot_be_detected_is_fatal(self):
+        results=[subprocess.CompletedProcess([],d.NOT_FOUND),subprocess.CompletedProcess([],0),
+                 subprocess.CompletedProcess([],d.NOT_FOUND)]
+        with patch.object(d,'inventory',return_value=[]),patch.object(d.shutil,'which',return_value='winget'),patch.object(d.subprocess,'run',side_effect=results):
+            with self.assertRaises(RuntimeError): d.install(self.package)
+
     def test_failed_install_not_owned(self):
-        with patch.object(d,'inventory',return_value=[]),patch.object(d.shutil,'which',return_value='winget'),patch.object(d.subprocess,'run',side_effect=[subprocess.CompletedProcess([],0x8A150014),subprocess.CalledProcessError(1,[]) ]):
+        results=[subprocess.CompletedProcess([],d.NOT_FOUND)]+[subprocess.CompletedProcess([],1)]*3
+        with patch.object(d,'inventory',return_value=[]),patch.object(d.shutil,'which',return_value='winget'),patch.object(d.subprocess,'run',side_effect=results):
             with self.assertRaises(subprocess.CalledProcessError): d.install(self.package)
         self.assertIsNone(d.load_receipt(self.package))
 
@@ -66,5 +90,26 @@ class OwnershipTests(unittest.TestCase):
 
     def test_unknown_package_rejected(self):
         with self.assertRaises(ValueError): d.remove('arbitrary-command')
+
+    def test_optional_tool_failure_does_not_abort_core_setup(self):
+        with patch.object(d,'install',side_effect=[None,RuntimeError('network unavailable'),None]):
+            failures=runtime.install_desktop_dependencies()
+        self.assertEqual(failures,{'OpenJS.NodeJS.LTS':'network unavailable'})
+
+    def test_all_optional_tools_can_be_repaired_on_rerun(self):
+        with patch.object(d,'install',side_effect=RuntimeError('winget unavailable')):
+            first=runtime.install_desktop_dependencies()
+        with patch.object(d,'install',return_value=None):
+            second=runtime.install_desktop_dependencies()
+        self.assertEqual(set(first),{'Git.Git','OpenJS.NodeJS.LTS','Microsoft.VisualStudioCode'})
+        self.assertEqual(second,{})
+
+    def test_repair_report_is_created_then_cleared(self):
+        with patch.object(runtime,'DATA_DIR',self.state):
+            runtime.record_optional_failures({'Git.Git':'temporary failure'})
+            report=self.state/'optional-dependencies.json'
+            self.assertTrue(report.is_file())
+            runtime.record_optional_failures({})
+            self.assertFalse(report.exists())
 
 if __name__=='__main__': unittest.main(verbosity=2)

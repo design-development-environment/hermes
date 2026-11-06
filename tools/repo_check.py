@@ -5,6 +5,26 @@ from assemble import SHARED_MODULES
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = set(SHARED_MODULES)
+VERSION = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
+
+if not re.fullmatch(r'\d+\.\d+\.\d+', VERSION):
+    raise SystemExit(f'Invalid release version: {VERSION!r}')
+
+# These sources embed the product version in runtime metadata or native package
+# defaults.  Native builders override some of them, but a stale fallback makes
+# manual and offline builds disagree with CI.
+for relative in (
+    'client/desktop-package.json', 'client/desktop/package.json',
+    'client/windows-user.nsi', 'core/app.py', 'core/backup_manager.py',
+    'core/hermes_tools.py', 'core/model_instructions.txt',
+    'packaging/hermes_setup.py', 'platforms/windows/installer.nsi',
+    'platforms/windows/source/backup_manager.py',
+    'platforms/windows/source/ui.py', 'platforms/windows/source/windows_setup.py',
+    'platforms/macos/source/backup_manager.py',
+    'platforms/macos/source/ui.py', 'platforms/macos/source/mac_setup.py',
+):
+    if VERSION not in (ROOT / relative).read_text(encoding='utf-8'):
+        raise SystemExit(f'Version drift in {relative}: expected {VERSION}')
 
 for platform in ('windows', 'macos'):
     source = ROOT / 'platforms' / platform / 'source'

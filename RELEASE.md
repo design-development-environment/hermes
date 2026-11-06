@@ -1,10 +1,11 @@
 # Release checklist
 
-## Hermes 2.0.2 — Windows installation repair
+## Hermes 2.0.3 — resilient cross-platform setup
 
-- Prevents Windows from replacing a Pillow native module while setup is using it.
-- Repairs partial installations and applies pinned dependency changes during upgrades.
-- Enforces matching bootstrap and runtime dependency versions in CI.
+- Keeps a successful Windows package install successful even when uninstall ownership cannot be proven.
+- Retries transient Windows package-manager and macOS DMG verification failures.
+- Lets the Hermes backend start when optional Windows developer tools need later repair.
+- Exercises absent, existing, fresh, partial, unverifiable and failed dependency states without mutating the test machine.
 - Keeps separate Hermes Setup and Hermes User installers for every platform.
 
 The private repository builds release installers. A successful CI run proves

@@ -192,7 +192,15 @@ jobs:
             echo 'Notarization credentials are not configured; artifacts remain locally installable with normal Gatekeeper confirmation.'
           fi
           for pkg in dist/macos/Hermes-*-macOS-Apple-Silicon.pkg; do pkgutil --check-signature "$pkg" || true; done
-          for dmg in dist/macos/Hermes-*-macOS-Apple-Silicon.dmg; do hdiutil verify "$dmg"; done
+          for dmg in dist/macos/Hermes-*-macOS-Apple-Silicon.dmg; do
+            verified=false
+            for attempt in 1 2 3; do
+              if hdiutil verify "$dmg"; then verified=true; break; fi
+              echo "DMG verification attempt $attempt failed; waiting before retry"
+              sleep $((attempt * 3))
+            done
+            if [[ "$verified" != true ]]; then echo "DMG verification failed after 3 attempts" >&2; exit 1; fi
+          done
           shasum -a 256 dist/macos/Hermes-*-macOS-Apple-Silicon.pkg dist/macos/Hermes-*-macOS-Apple-Silicon.dmg | sed 's#  .*/#  #' > dist/macos/SHA256SUMS-macos-apple-silicon.txt
       - name: Remove temporary signing keychain
         if: always()
