@@ -17,10 +17,10 @@ Var CodeBox
 Var TailscaleBox
 Var OptionsDialog
 !ifndef PRODUCT_VERSION
-  !define PRODUCT_VERSION "2.0.4"
+  !define PRODUCT_VERSION "2.0.5"
 !endif
 !ifndef PRODUCT_VERSION_QUAD
-  !define PRODUCT_VERSION_QUAD "2.0.4.1"
+  !define PRODUCT_VERSION_QUAD "2.0.5.1"
 !endif
 Name "Hermes"
 Caption "Install Hermes ${PRODUCT_VERSION}"
@@ -57,7 +57,7 @@ UninstPage custom un.CleanupOptions un.CleanupOptionsLeave
 !insertmacro MUI_LANGUAGE "English"
 
 Function LaunchHermes
-  Exec '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "$INSTDIR\bootstrap.ps1"'
+  Exec '"$SYSDIR\wscript.exe" "$INSTDIR\launch.vbs"'
 FunctionEnd
 
 Function .onInit
@@ -134,8 +134,12 @@ FunctionEnd
 Section "Hermes"
   SetOutPath "$INSTDIR"
   File "client\Hermes-user-Windows-x64.exe"
-  ExecWait '"$INSTDIR\Hermes-user-Windows-x64.exe" /S'
+  ExecWait '"$INSTDIR\Hermes-user-Windows-x64.exe" /S' $0
+  ${If} $0 != 0
+    Abort "Hermes User installation failed. Close Hermes and retry."
+  ${EndIf}
   File "bootstrap.ps1"
+  File "launch.vbs"
   File "uninstall.ps1"
   File "README-WINDOWS.md"
   File "LICENSE"
@@ -146,7 +150,7 @@ Section "Hermes"
   File "build-tools\pillow-13.0.0-cp312-cp312-win_amd64.whl"
   SetOutPath "$INSTDIR"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-  CreateShortcut "$SMPROGRAMS\Hermes.lnk" "$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "$INSTDIR\bootstrap.ps1"' "$INSTDIR\source\branding\hermes.ico"
+  CreateShortcut "$SMPROGRAMS\Hermes Setup.lnk" "$SYSDIR\wscript.exe" '"$INSTDIR\launch.vbs"' "$INSTDIR\source\branding\hermes.ico"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "DisplayName" "Hermes"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes" "Publisher" "Anshul & Miheer"
@@ -162,14 +166,16 @@ Section "Hermes"
 SectionEnd
 
 Section "Uninstall"
-  ExecWait '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\uninstall.ps1" -DeleteData $DeleteData -RemovePython $RemovePython -RemoveGit $RemoveGit -RemoveNode $RemoveNode -RemoveCode $RemoveCode -RemoveTailscale $RemoveTailscale' $0
+  nsExec::Exec '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\uninstall.ps1" -DeleteData $DeleteData -RemovePython $RemovePython -RemoveGit $RemoveGit -RemoveNode $RemoveNode -RemoveCode $RemoveCode -RemoveTailscale $RemoveTailscale'
+  Pop $0
   ${If} $0 != 0
     MessageBox MB_ICONEXCLAMATION "Uninstall did not finish. Nothing was reported as fully removed. See %LOCALAPPDATA%\Hermes-uninstall.log, then retry. You may need to uncheck a dependency or repair Hermes first."
     SetErrorLevel 1
     Abort
   ${EndIf}
   Delete "$SMSTARTUP\Hermes Background.lnk"
-  Delete "$SMPROGRAMS\Hermes.lnk"
+  Delete "$SMPROGRAMS\Hermes Setup.lnk"
+  Delete "$INSTDIR\launch.vbs"
   Delete "$INSTDIR\bootstrap.ps1"
   Delete "$INSTDIR\uninstall.ps1"
   Delete "$INSTDIR\bootstrap.log"

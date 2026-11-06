@@ -7,6 +7,7 @@ param(
     [ValidateSet(0,1)][int]$RemoveTailscale=0
 )
 $ErrorActionPreference='Stop'
+# Process enumeration must return an array even when only one child survives.
 $root=$PSScriptRoot
 $privateRoot=Join-Path $env:LOCALAPPDATA 'Hermes'
 $log=Join-Path $env:LOCALAPPDATA 'Hermes-uninstall.log'
@@ -33,9 +34,10 @@ try {
         })
     }
     $deadline=(Get-Date).AddSeconds(20)
-    while ((Get-HermesProcesses).Count -gt 0 -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }
+    while (@(Get-HermesProcesses).Count -gt 0 -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }
     foreach ($process in Get-HermesProcesses) { Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop }
-    Start-Sleep -Milliseconds 500
+    $deadline=(Get-Date).AddSeconds(10)
+    while (@(Get-HermesProcesses).Count -gt 0 -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 250 }
     if ((Get-HermesProcesses).Count) { throw 'Hermes is still running. Close it and retry uninstall.' }
 
     $selected=@()

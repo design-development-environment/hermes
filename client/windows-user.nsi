@@ -3,10 +3,10 @@ Unicode True
 !include "x64.nsh"
 !include "WinVer.nsh"
 !ifndef PRODUCT_VERSION
-  !define PRODUCT_VERSION "2.0.4"
+  !define PRODUCT_VERSION "2.0.5"
 !endif
 !ifndef PRODUCT_VERSION_QUAD
-  !define PRODUCT_VERSION_QUAD "2.0.4.1"
+  !define PRODUCT_VERSION_QUAD "2.0.5.1"
 !endif
 Name "Hermes User"
 Caption "Install Hermes User ${PRODUCT_VERSION}"
@@ -75,5 +75,8 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\Hermes.lnk"
   Delete "$DESKTOP\Hermes.lnk"
   RMDir /r "$INSTDIR"
+  IfFileExists "$INSTDIR\\runtime\\electron.exe" 0 +3
+    SetErrorLevel 1
+    Abort "Close Hermes User and retry uninstall."
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\HermesUser"
 SectionEnd

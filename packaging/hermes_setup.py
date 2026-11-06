@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw, ImageTk
 PAYLOAD = Path('/opt/hermes/payload')
 ROOT = Path.home() / 'hermes-v4'
 ASKPASS = '/opt/hermes/askpass.sh'
-VERSION = '2.0.4'
+VERSION = '2.0.5'
 
 
 class SummaryCard(tk.Canvas):
@@ -456,7 +456,7 @@ class Setup(tk.Tk):
 
     def tailscale(self):
         # Login URLs printed by Tailscale can be pasted into the browser.
-        self.command(['sudo', '-A', 'tailscale', 'up'], self.serve)
+        self.command(['sudo', '-A', 'tailscale', 'up', '--timeout=2m'], self.serve)
 
     def serve(self):
         self.command(['sudo', '-A', 'tailscale', 'serve', '--bg', '--yes', '3000'])

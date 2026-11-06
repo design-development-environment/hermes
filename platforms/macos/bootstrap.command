@@ -3,7 +3,6 @@ set -euo pipefail
 umask 077
 resources="$(cd "$(dirname "$0")" && pwd)"
 base="$HOME/Library/Application Support/Hermes"
-trap 'printf "\nSetup stopped. Read the error above. Press Return to close.\n"; read -r reply' ERR
 if [[ "$(uname -s)" != Darwin || "$(uname -m)" != arm64 ]]; then
     printf 'Hermes requires an Apple Silicon Mac running natively, without Rosetta.\n'
     exit 1
@@ -17,9 +16,7 @@ for candidate in /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.
     fi
 done
 if [[ -z "$python" ]]; then
-    printf 'Hermes requires Python 3.12 with Tk. Download the official signed installer? [y/N] '
-    read -r answer
-    if [[ "$answer" != y && "$answer" != Y ]]; then exit 1; fi
+    /usr/bin/osascript -e 'display dialog "Download the verified Python 3.12 installer for Hermes?" buttons {"Cancel","Download"} default button "Download"'
     download="$(mktemp -d -t hermes-python)"
     pkg="$download/python-3.12.10-macos11.pkg"
     /usr/bin/curl --fail --location --retry 2 --proto '=https' --tlsv1.2 \
@@ -29,8 +26,6 @@ if [[ -z "$python" ]]; then
     if [[ "$expected" != "$actual" ]]; then printf 'Python checksum mismatch.\n'; exit 1; fi
     /usr/sbin/pkgutil --check-signature "$pkg"
     /usr/bin/open -W "$pkg"
-    printf 'Finish Python installation, then press Return here.\n'
-    read -r answer
     python=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12
     "$python" -c 'import tkinter,platform; assert platform.machine()=="arm64"'
     rm -f "$pkg"
@@ -47,7 +42,7 @@ mkdir -p "$base/source"
 cp -R "$resources/source/." "$base/source/"
 export PYTHONUTF8=1
 export PIP_CACHE_DIR="$base/data/cache/pip"
-if [[ -x "$base/runtime/bin/open-webui" ]]; then
+if [[ -x "$base/runtime/bin/open-webui" && -f "$base/config/setup-complete" ]]; then
     "$base/runtime/bin/python" "$base/source/mac_runtime.py" upgrade
     /usr/bin/open 'http://127.0.0.1:3000'
     exit 0

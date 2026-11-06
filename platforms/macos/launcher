@@ -1,15 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 resources="$(cd "$(dirname "$0")/../Resources" && pwd)"
-if [[ -x "$HOME/Library/Application Support/Hermes/runtime/bin/python" && -f "$HOME/Library/Application Support/Hermes/source/mac_setup.py" ]]; then
-    /usr/bin/open -a Terminal "$resources/bootstrap.command"
-    exit 0
+umask 077
+logdir="$HOME/Library/Logs/Hermes"
+mkdir -p "$logdir"
+if ! /bin/bash "$resources/bootstrap.command" >"$logdir/setup.log" 2>&1; then
+    /usr/bin/osascript -e 'display alert "Hermes setup stopped" message "See ~/Library/Logs/Hermes/setup.log for details. Open Hermes Setup to retry."'
+    exit 1
 fi
-/usr/bin/osascript - "$resources/bootstrap.command" <<'APPLESCRIPT'
-on run argv
-    tell application "Terminal"
-        activate
-        do script (quoted form of (item 1 of argv))
-    end tell
-end run
-APPLESCRIPT

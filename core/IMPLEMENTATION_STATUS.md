@@ -1,6 +1,6 @@
 # Hermes implementation status
 
-Current release: **Hermes 2.0.4**
+Current release: **Hermes 2.0.5**
 
 ## 1.0 — persistent personal agent
 

@@ -1,12 +1,8 @@
 # Release checklist
 
-## Hermes 2.0.4 — clean Windows first-run
+## Hermes 2.0.5 — Quality of life improvements
 
-- Restarts Python after installing pywin32 before importing Windows modules.
-- Runs startup-shortcut creation outside the long-lived setup UI process.
-- Keeps partial Windows installations safe to retry.
-- Covers the first-run and startup handoff with Windows-native regressions.
-- Keeps separate Hermes Setup and Hermes User installers for every platform.
+See RELEASE_NOTES.md for the installer changes.
 
 The repository builds release installers. A successful CI run proves that
 source checks, platform regressions and native packaging passed. Final

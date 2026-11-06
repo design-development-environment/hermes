@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw, ImageTk
 PAYLOAD = Path('/opt/hermes/payload')
 ROOT = Path(__file__).resolve().parent
 ASKPASS = '/opt/hermes/askpass.sh'
-VERSION = '2.0.4'
+VERSION = '2.0.5'
 
 
 class SummaryCard(tk.Canvas):
@@ -391,7 +391,7 @@ class Setup(tk.Tk):
 
         def run():
             try:
-                proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, env=env)
+                proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, env=env, creationflags=subprocess.CREATE_NO_WINDOW)
                 for line in proc.stdout:
                     self.events.put(('line', line))
                 self.events.put(('done', proc.wait(), on_success))
