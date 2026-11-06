@@ -69,11 +69,11 @@ class MacSetup(Setup):
 
     def render(self):
         super().render()
-        descriptions={0:'Set up Hermes 2.0.1 on Apple Silicon with macOS 14 or newer. Internet and at least 12 GB free space are required.',
+        descriptions={0:'Set up Hermes 2.0.2 on Apple Silicon with macOS 14 or newer. Internet and at least 12 GB free space are required.',
           1:'Install pinned dependencies, Open WebUI and Hermes in your user account. Cloud AI only; no local model weights are downloaded.',
           4:'Hermes starts after you log into your Mac. Grant desktop permissions, then connect Tailscale for remote access. Automatic Mac login is not configured.',
           5:'Verify local services, agent tools and presets, then test cloud chat, goals, files, browser control, screenshots and voice on this Mac.',
-          6:'Hermes 2.0.1 is configured for startup at login. Keep your Mac awake and unlocked for desktop actions. Cloud services require your own API keys.'}
+          6:'Hermes 2.0.2 is configured for startup at login. Keep your Mac awake and unlocked for desktop actions. Cloud services require your own API keys.'}
         if self.step in descriptions: self.body.configure(text=descriptions[self.step])
         if self.step==4:
             for child in self.choice.winfo_children(): child.destroy()

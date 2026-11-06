@@ -1,16 +1,14 @@
-# Hermes 2.0.1 — Bug fixes
+# Hermes 2.0.2 — Windows installation repair
 
-Hermes 2.0.1 is a clean-machine installer reliability update.
+Hermes 2.0.2 fixes a Windows native-module lock that could stop backend setup.
 
 ## Fixed
 
-- Windows backend setup no longer stops on MCP's `PyJWT[crypto]` dependency while pip hash verification is enabled.
-- The matching macOS dependency lock has the same explicit cryptography extra.
-- CI now resolves the complete hashed Windows and macOS installer locks on native runners before packaging or publishing.
-- Repository checks reject unpinned, unhashed, or accidentally stripped dependency extras.
-- SQLite health, preset, planning, and setup checks now commit transactions and close connections cleanly instead of leaking handles.
-- Electron builds no longer pass deprecated target settings through npm, removing npm 11 warnings while preserving the requested platform runtime.
-- Setup screens, service APIs, backup manifests, desktop packages, and documentation now report one consistent version.
+- The graphical setup dependency now exactly matches the pinned runtime dependency, so Windows never tries to replace a loaded `_imaging` DLL.
+- Failed or partial Windows installations can be repaired by running the updated installer again.
+- Host upgrades now reinstall and verify the complete pinned dependency set before restarting services.
+- macOS uses the same deterministic bootstrap/runtime dependency rule.
+- Repository checks now fail if a future bootstrap dependency drifts away from either platform lock.
 
 All Hermes 2.0 features remain unchanged: Host/User installers, Open WebUI,
 Tailscale access, Hermes Alpha/Beta/Gamma, desktop tools, memory, planning,

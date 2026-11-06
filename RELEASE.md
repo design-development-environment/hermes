@@ -1,10 +1,10 @@
 # Release checklist
 
-## Hermes 2.0.1 — installer reliability update
+## Hermes 2.0.2 — Windows installation repair
 
-- Fixes clean Windows and macOS backend installation in pip hash-checking mode.
-- Validates full native dependency locks before any installer can be released.
-- Closes SQLite handles cleanly and removes deprecated npm build settings.
+- Prevents Windows from replacing a Pillow native module while setup is using it.
+- Repairs partial installations and applies pinned dependency changes during upgrades.
+- Enforces matching bootstrap and runtime dependency versions in CI.
 - Keeps separate Hermes Setup and Hermes User installers for every platform.
 
 The private repository builds release installers. A successful CI run proves

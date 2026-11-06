@@ -67,11 +67,11 @@ class WindowsSetup(Setup):
 
     def render(self):
         super().render()
-        text={0:'Set up Hermes 2.0.1 on Windows 10 or 11, 64-bit. Hermes uses cloud AI and authenticated tools on your Windows desktop. Allow at least 12 GB free space and a working internet connection.',
+        text={0:'Set up Hermes 2.0.2 on Windows 10 or 11, 64-bit. Hermes uses cloud AI and authenticated tools on your Windows desktop. Allow at least 12 GB free space and a working internet connection.',
               1:'Install the pinned Python dependencies, Open WebUI and Hermes background processes. Downloads can take several minutes. Installation can be retried if a download fails.',
               4:'Hermes starts automatically when you sign into Windows. Connect Tailscale, then enable Tailscale Serve for phone access. Automatic login requires entering your Windows credentials in Microsoft Autologon.',
               5:'Check the local services, agent tools and model presets. Then test cloud chat, goals, files, screenshots, browser control, voice and phone access.',
-              6:'Hermes 2.0.1 is configured to start when you sign into Windows. Desktop control requires an unlocked session. Cloud services require your own API keys.'}
+              6:'Hermes 2.0.2 is configured to start when you sign into Windows. Desktop control requires an unlocked session. Cloud services require your own API keys.'}
         if self.step in text: self.body.configure(text=text[self.step])
         if self.step==4:
             RoundedButton(self.choice,text='Terminal permission',command=self.terminal).pack(anchor='w',pady=4)

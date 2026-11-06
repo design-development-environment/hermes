@@ -51,7 +51,10 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Could not create the private Hermes environment.' }
     }
     $runtime = "$root\runtime\Scripts\python.exe"
-    & $runtime -m pip install --no-cache-dir --no-index --find-links "$root\bootstrap" Pillow==12.0.0
+    # The setup UI imports Pillow while the full runtime is installed.  Windows
+    # cannot replace a loaded native _imaging module, so this bootstrap version
+    # must stay identical to the version in requirements-windows.lock.
+    & $runtime -m pip install --no-cache-dir --no-index --find-links "$root\bootstrap" Pillow==13.0.0
     if ($LASTEXITCODE -ne 0) { throw 'Could not install the setup graphics library.' }
     if (Test-Path "$root\runtime\Scripts\open-webui.exe") {
         & $runtime "$root\source\windows_runtime.py" upgrade

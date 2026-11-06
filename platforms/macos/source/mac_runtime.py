@@ -45,12 +45,18 @@ def prepare():
 def start():
     subprocess.run(['/bin/launchctl','kickstart',f'gui/{os.getuid()}/com.hermes.assistant'],check=True)
 
+def install_dependencies():
+    """Install or repair the complete pinned runtime before starting services."""
+    subprocess.run([str(PYTHON),'-m','pip','install','--require-hashes','-r',str(PROJECT_ROOT/'requirements-macos.lock')],check=True,env=environment())
+    subprocess.run([str(PYTHON),'-m','pip','check'],check=True)
+
 def upgrade():
     """Activate replaced source without resetting data, keys, or presets."""
     prepare()
     agent=Path.home()/'Library/LaunchAgents/com.hermes.assistant.plist'
     if agent.exists():
         subprocess.run(['/bin/launchctl','bootout',f'gui/{os.getuid()}',str(agent)],capture_output=True)
+    install_dependencies()
     database=openwebui_data_dir()/'webui.db'
     if database.exists():
         from bootstrap_openwebui import readiness
@@ -124,8 +130,7 @@ def install():
     import platform
     if platform.machine()!='arm64' or int(platform.mac_ver()[0].split('.')[0])<14:
         raise RuntimeError('Apple Silicon and macOS 14 or newer are required. Run native Python, not Rosetta.')
-    subprocess.run([str(PYTHON),'-m','pip','install','--require-hashes','-r',str(PROJECT_ROOT/'requirements-macos.lock')],check=True,env=environment())
-    subprocess.run([str(PYTHON),'-m','pip','check'],check=True)
+    install_dependencies()
     prepare(); (CONFIG_DIR/'stop').unlink(missing_ok=True); startup()
     for _ in range(180):
         if all(check_url(p) for p in (3000,8765,8766)):

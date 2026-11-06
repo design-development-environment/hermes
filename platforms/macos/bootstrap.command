@@ -40,7 +40,9 @@ mkdir -p "$base/config" "$base/data"
 chmod 700 "$base" "$base/config" "$base/data"
 # Use a stable private runtime so LaunchAgents do not depend on a USB or Downloads path.
 if [[ ! -x "$base/runtime/bin/python" ]]; then "$python" -m venv "$base/runtime"; fi
-"$base/runtime/bin/python" -m pip install --no-cache-dir 'Pillow==12.0.0'
+# Keep the setup UI dependency identical to the full runtime lock.  This avoids
+# replacing a native module while the graphical installer is using it.
+"$base/runtime/bin/python" -m pip install --no-cache-dir 'Pillow==13.0.0'
 mkdir -p "$base/source"
 cp -R "$resources/source/." "$base/source/"
 export PYTHONUTF8=1

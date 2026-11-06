@@ -17,10 +17,10 @@ Var CodeBox
 Var TailscaleBox
 Var OptionsDialog
 !ifndef PRODUCT_VERSION
-  !define PRODUCT_VERSION "2.0.1"
+  !define PRODUCT_VERSION "2.0.2"
 !endif
 !ifndef PRODUCT_VERSION_QUAD
-  !define PRODUCT_VERSION_QUAD "2.0.1.1"
+  !define PRODUCT_VERSION_QUAD "2.0.2.1"
 !endif
 Name "Hermes"
 Caption "Install Hermes ${PRODUCT_VERSION}"
@@ -143,7 +143,7 @@ Section "Hermes"
   File /r /x __pycache__ "source\*"
   SetOutPath "$INSTDIR\bootstrap"
   File "build-tools\python-3.12.10-amd64.exe"
-  File "build-tools\pillow-12.0.0-cp312-cp312-win_amd64.whl"
+  File "build-tools\pillow-13.0.0-cp312-cp312-win_amd64.whl"
   SetOutPath "$INSTDIR"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   CreateShortcut "$SMPROGRAMS\Hermes.lnk" "$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "$INSTDIR\bootstrap.ps1"' "$INSTDIR\source\branding\hermes.ico"

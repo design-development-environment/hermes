@@ -3,10 +3,10 @@ Unicode True
 !include "x64.nsh"
 !include "WinVer.nsh"
 !ifndef PRODUCT_VERSION
-  !define PRODUCT_VERSION "2.0.1"
+  !define PRODUCT_VERSION "2.0.2"
 !endif
 !ifndef PRODUCT_VERSION_QUAD
-  !define PRODUCT_VERSION_QUAD "2.0.1.1"
+  !define PRODUCT_VERSION_QUAD "2.0.2.1"
 !endif
 Name "Hermes User"
 Caption "Install Hermes User ${PRODUCT_VERSION}"

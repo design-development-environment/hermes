@@ -65,12 +65,18 @@ def wait_until_stopped(timeout=30):
     if pid and psutil.pid_exists(pid):
         raise RuntimeError('The previous Hermes runtime did not stop safely.')
 
+def install_dependencies():
+    """Install or repair the complete pinned runtime before starting services."""
+    subprocess.run([str(PYTHON),'-m','pip','install','--require-hashes','-r',str(PROJECT_ROOT/'requirements-windows.lock')],check=True)
+    subprocess.run([str(PYTHON),'-m','pip','check'],check=True)
+
 def upgrade():
     """Activate replaced source without resetting data, keys, or presets."""
     prepare()
     stop=CONFIG_DIR/'stop'
     stop.write_text('upgrade',encoding='utf-8')
     wait_until_stopped()
+    install_dependencies()
     database=openwebui_data_dir()/'webui.db'
     if database.exists():
         from bootstrap_openwebui import readiness
@@ -137,8 +143,7 @@ def supervise():
         win32api.CloseHandle(mutex)
 
 def install():
-    subprocess.run([str(PYTHON),'-m','pip','install','--require-hashes','-r',str(PROJECT_ROOT/'requirements-windows.lock')],check=True)
-    subprocess.run([str(PYTHON),'-m','pip','check'],check=True)
+    install_dependencies()
     # Install the desktop development tools using Windows' package manager.
     import shutil
     winget=shutil.which('winget')
