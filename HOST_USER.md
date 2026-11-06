@@ -1,6 +1,6 @@
 # Hermes Host and User
 
-Hermes 2 beta separates the system into two installable roles.
+Hermes 2 separates the system into two installable roles on every supported platform.
 
 ## Hermes Host
 
@@ -16,7 +16,7 @@ finishes its health check, it opens that installer for the local computer.
 Install this on another Tailscale-connected computer. It contains no model,
 backend service, provider key, bearer token, chat database or desktop-control
 capability. It remembers only a validated Host Tailscale address and opens it
-in the normal browser. The user then signs into Open WebUI normally.
+inside the Hermes desktop app. The user then signs into Open WebUI normally.
 
 ## Connection sequence
 

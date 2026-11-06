@@ -1,0 +1,1 @@
+body{font-family:Inter,system-ui,sans-serif}#sidebar{border-inline-end:1px solid color-mix(in srgb,currentColor 8%,transparent)}#chat-input{line-height:1.55}#messages-container{scroll-padding-bottom:8rem}button:focus-visible{outline-offset:3px}dialog,[role=dialog]{border-radius:20px}

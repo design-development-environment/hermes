@@ -37,6 +37,13 @@ def assemble(platform: str, destination: Path) -> None:
         shutil.copy2(ROOT / 'core' / name, destination / 'source' / name)
     for name in RELEASE_FILES:
         shutil.copy2(ROOT / name, destination / name)
+    shutil.copytree(
+        ROOT / 'client', destination / 'client',
+        ignore=shutil.ignore_patterns('node_modules', '__pycache__', '*.pyc'),
+    )
+    for name in ('icon-dark.png', 'hermes-dark.svg', 'hermes-light.svg'):
+        shutil.copy2(ROOT / 'packaging' / 'branding' / name, destination / 'client' / 'desktop' /
+                     ('icon.png' if name == 'icon-dark.png' else name))
 
 
 if __name__ == '__main__':

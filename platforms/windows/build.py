@@ -25,7 +25,7 @@ if not makensis:
     environment['NSISDIR']=str(nsis/'usr/share/nsis')
 if not Path(makensis).is_file() and not shutil.which(makensis):
     raise SystemExit('NSIS makensis was not found. Install NSIS or provide build-tools/nsis.')
-output=root/f'Hermes-{version}-Windows-x64-Setup.exe'
+output=root/'Hermes-setup-Windows-x64.exe'
 define='/' if os.name == 'nt' else '-'
 subprocess.run([makensis,'-V2',f'{define}DPRODUCT_VERSION={version}',f'{define}DPRODUCT_VERSION_QUAD={numeric_version}.1',str(root/'installer.nsi')],cwd=root,env=environment,check=True)
 files=[output, root/'build-tools/python-3.12.10-amd64.exe', root/'source/requirements-windows.lock']

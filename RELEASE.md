@@ -1,8 +1,8 @@
 # Release checklist
 
-## Hermes 2.0.0-beta.1 — Host and User preview
+## Hermes 2.0.0 — official Host and User release
 
-- Adds separate Hermes Host and Hermes User installers for Debian-family Linux.
+- Adds separate Hermes Setup and Hermes User installers for Linux, Windows, and macOS.
 - Embeds the matching User installer in every Host package.
 - Keeps remote authentication in Open WebUI and transport private through Tailscale.
 

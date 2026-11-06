@@ -40,12 +40,15 @@ jobs:
           PYTHONPATH=client python -m unittest discover -s client -p 'test_*.py' -q
       - name: Build Debian installer
         run: |
-          python packaging/build_deb.py --architecture ${{ matrix.arch }} --output dist/Hermes-$(cat VERSION)-Host-Linux-${{ matrix.arch }}.deb
-          python packaging/build_user_deb.py --architecture ${{ matrix.arch }} --output dist/Hermes-$(cat VERSION)-User-Linux-${{ matrix.arch }}.deb
+          python packaging/build_user_deb.py --architecture ${{ matrix.arch }} --output dist/Hermes-user-Linux-${{ matrix.arch }}.deb
+          python packaging/build_deb.py --architecture ${{ matrix.arch }} --output dist/Hermes-setup-Linux-${{ matrix.arch }}.deb
+          sha256sum dist/Hermes-*-Linux-${{ matrix.arch }}.deb | sed 's#  dist/#  #' > dist/SHA256SUMS-linux-${{ matrix.arch }}.txt
       - uses: actions/upload-artifact@v4
         with:
           name: hermes-linux-${{ matrix.arch }}
-          path: dist/Hermes-*-Linux-${{ matrix.arch }}.deb
+          path: |
+            dist/Hermes-*-Linux-${{ matrix.arch }}.deb
+            dist/SHA256SUMS-linux-${{ matrix.arch }}.txt
           if-no-files-found: error
 
   windows:
@@ -78,32 +81,40 @@ jobs:
           if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'Python Software Foundation') { throw 'Python bootstrap signature is invalid' }
           python -m pip download --no-deps --only-binary=:all: --platform win_amd64 --python-version 312 --implementation cp --abi cp312 --dest dist/windows/build-tools Pillow==12.0.0
       - name: Build native Windows installer
-        run: python dist/windows/build.py
+        run: |
+          python dist/windows/client/build_windows.py
+          copy dist\windows\client\Hermes-user-Windows-x64.exe dist\windows\Hermes-user-Windows-x64.exe
+          python dist/windows/build.py
       - name: Sign Windows installer when publisher credentials are configured
         shell: pwsh
         env:
           WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
           WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
         run: |
-          $installer = Get-ChildItem dist/windows/Hermes-*-Windows-x64-Setup.exe | Select-Object -First 1
+          $installers = Get-ChildItem dist/windows/Hermes-*-Windows-x64.exe
           if ($env:WINDOWS_CERTIFICATE_BASE64) {
             [IO.File]::WriteAllBytes("$env:RUNNER_TEMP/hermes-signing.pfx", [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64))
             $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe | Where-Object FullName -Match '\\x64\\' | Sort-Object FullName | Select-Object -Last 1
             if (!$signtool) { throw 'signtool.exe was not found' }
-            & $signtool.FullName sign /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f "$env:RUNNER_TEMP/hermes-signing.pfx" /p $env:WINDOWS_CERTIFICATE_PASSWORD $installer.FullName
-            if ($LASTEXITCODE -ne 0) { throw 'Windows signing failed' }
+            foreach ($installer in $installers) {
+              & $signtool.FullName sign /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f "$env:RUNNER_TEMP/hermes-signing.pfx" /p $env:WINDOWS_CERTIFICATE_PASSWORD $installer.FullName
+              if ($LASTEXITCODE -ne 0) { throw 'Windows signing failed' }
+            }
           } else {
             Write-Host 'Publisher certificate is not configured; producing a valid unsigned installer.'
           }
-          $result = Get-AuthenticodeSignature $installer.FullName
-          if ($env:WINDOWS_CERTIFICATE_BASE64 -and $result.Status -ne 'Valid') { throw "Invalid installer signature: $($result.Status)" }
-          $hash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLower()
-          "$hash  $($installer.Name)" | Set-Content -Encoding ascii dist/windows/SHA256SUMS-windows-x64.txt
+          $lines = foreach ($installer in $installers) {
+            $result = Get-AuthenticodeSignature $installer.FullName
+            if ($env:WINDOWS_CERTIFICATE_BASE64 -and $result.Status -ne 'Valid') { throw "Invalid installer signature: $($result.Status)" }
+            $hash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($installer.Name)"
+          }
+          $lines | Set-Content -Encoding ascii dist/windows/SHA256SUMS-windows-x64.txt
       - uses: actions/upload-artifact@v4
         with:
           name: hermes-windows-x64
           path: |
-            dist/windows/Hermes-*-Windows-x64-Setup.exe
+            dist/windows/Hermes-*-Windows-x64.exe
             dist/windows/SHA256SUMS-windows-x64.txt
           if-no-files-found: error
 
@@ -147,26 +158,26 @@ jobs:
         env:
           MACOS_APPLICATION_IDENTITY: ${{ secrets.MACOS_APPLICATION_IDENTITY }}
           MACOS_INSTALLER_IDENTITY: ${{ secrets.MACOS_INSTALLER_IDENTITY }}
-        run: python dist/macos/build.py
+        run: |
+          python dist/macos/client/build_macos.py
+          python dist/macos/build.py
       - name: Notarize when Apple credentials are configured
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
         run: |
-          PKG=$(find dist/macos -maxdepth 1 -name 'Hermes-*-macOS-Apple-Silicon.pkg' -print -quit)
-          DMG=$(find dist/macos -maxdepth 1 -name 'Hermes-*-macOS-Apple-Silicon.dmg' -print -quit)
           if [[ -n "$APPLE_ID" && -n "$APPLE_TEAM_ID" && -n "$APPLE_APP_PASSWORD" ]]; then
-            xcrun notarytool submit "$PKG" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
-            xcrun stapler staple "$PKG"
-            xcrun notarytool submit "$DMG" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
-            xcrun stapler staple "$DMG"
+            for artifact in dist/macos/Hermes-*-macOS-Apple-Silicon.pkg dist/macos/Hermes-*-macOS-Apple-Silicon.dmg; do
+              xcrun notarytool submit "$artifact" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
+              xcrun stapler staple "$artifact"
+            done
           else
             echo 'Notarization credentials are not configured; artifacts remain locally installable with normal Gatekeeper confirmation.'
           fi
-          pkgutil --check-signature "$PKG" || true
-          hdiutil verify "$DMG"
-          shasum -a 256 "$PKG" "$DMG" | sed 's#  .*/#  #' > dist/macos/SHA256SUMS-macos-apple-silicon.txt
+          for pkg in dist/macos/Hermes-*-macOS-Apple-Silicon.pkg; do pkgutil --check-signature "$pkg" || true; done
+          for dmg in dist/macos/Hermes-*-macOS-Apple-Silicon.dmg; do hdiutil verify "$dmg"; done
+          shasum -a 256 dist/macos/Hermes-*-macOS-Apple-Silicon.pkg dist/macos/Hermes-*-macOS-Apple-Silicon.dmg | sed 's#  .*/#  #' > dist/macos/SHA256SUMS-macos-apple-silicon.txt
       - name: Remove temporary signing keychain
         if: always()
         run: |

@@ -1,22 +1,21 @@
-# Hermes 2.0.0-beta.1 — Host and User preview
+# Hermes 2.0.0 — Host and User
 
-This preview introduces the split Hermes architecture.
+Hermes 2 is the first official split-platform release.
 
-## Included
+## What is new
 
-- **Hermes Host** installs the backend, Open WebUI, local tools, Tailscale and
-  automatic services.
-- **Hermes User** is a separate lightweight remote interface. It stores only a
-  Host Tailscale address and opens the normal Open WebUI sign-in page.
-- The Host package embeds the matching Hermes User installer and starts it
-  after Host verification.
-- No provider API keys, computer-control token, chat database, or Open WebUI
-  password is copied to a User device.
+- Separate **Hermes Setup** and **Hermes User** installers on Linux, Windows, and macOS.
+- Hermes Setup installs the secure backend and includes Hermes User for the Host computer.
+- Hermes User connects through Tailscale and uses the normal Open WebUI login.
+- A native Electron shell provides microphone permissions, saved Host selection, platform icons, and Hermes branding.
+- The model picker is restricted to **Hermes Alpha**, **Hermes Beta**, and **Hermes Gamma**.
+- Open WebUI remains the standard, upgradeable interface and authentication backend.
+- Health monitoring now uses the canonical `/health` endpoint.
+- Linux ARM64 packages use the correct Electron runtime.
+- Installer names and version metadata are consistent across every platform.
 
-## Beta limits
+## Privacy and security
 
-- The split Host/User Debian installers are the supported preview path.
-- Windows and macOS continue to ship the complete Host edition in this beta;
-  their dedicated User installers are the next compatibility milestone.
-- The Host must be online, signed into Tailscale, and configured with
-  Tailscale Serve before a User device can connect.
+Provider keys, control tokens, passwords, chats, databases, and backups are never included in releases. Remote access remains private to the user's Tailscale network.
+
+Unsigned builds may require the normal Windows SmartScreen or macOS Gatekeeper confirmation.

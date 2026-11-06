@@ -2,7 +2,7 @@
   <img src="packaging/branding/hermes-dark.svg" alt="Hermes" width="280">
 </p>
 
-## 2.0 beta: Host and User
+## 2.0: Host and User
 
 Hermes now has a **Host** installer for the computer it controls and a
 lightweight **User** installer for remote computers. The User app connects
@@ -17,7 +17,7 @@ your model keys, computer-control token, chats or Host data. See
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0--beta.1-0d0d0d">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0-0d0d0d">
   <img alt="Platforms" src="https://img.shields.io/badge/platforms-Linux%20%C2%B7%20Windows%20%C2%B7%20macOS-0d0d0d">
   <img alt="AI" src="https://img.shields.io/badge/AI-cloud-0d0d0d">
 </p>
@@ -49,10 +49,10 @@ Open the repository's **[Releases](https://github.com/design-development-environ
 
 | Platform | Installer | Requirements |
 |---|---|---|
-| Linux x86-64 | `.deb` | Debian, Ubuntu or Linux Mint |
-| Linux ARM64 | `.deb` | Debian-family ARM64 system |
-| Windows | `.exe` | 64-bit Windows 10 or 11 |
-| macOS | `.pkg` or `.dmg` | Apple Silicon, macOS 14+ |
+| Linux x86-64 | `Hermes-setup-Linux-amd64.deb` or `Hermes-user-Linux-amd64.deb` | Debian, Ubuntu or Linux Mint |
+| Linux ARM64 | `Hermes-setup-Linux-arm64.deb` or `Hermes-user-Linux-arm64.deb` | Debian-family ARM64 system |
+| Windows | `Hermes-setup-Windows-x64.exe` or `Hermes-user-Windows-x64.exe` | 64-bit Windows 10 or 11 |
+| macOS | `Hermes-setup-macOS-Apple-Silicon.*` or `Hermes-user-macOS-Apple-Silicon.*` | Apple Silicon, macOS 14+ |
 
 API keys and personal data are never included in releases. Unsigned test builds may show a Windows SmartScreen or macOS Gatekeeper confirmation.
 
@@ -83,7 +83,7 @@ Hermes keeps local databases, tokens, logs, backups and provider keys out of sou
 ---
 
 <p align="center">
-  <strong>Hermes 2.0.0-beta.1</strong><br>
+  <strong>Hermes 2.0.0</strong><br>
   Highly Efficient Real-time Machine for Everyday Support.<br><br>
   Created by Anshul & Miheer
 </p>

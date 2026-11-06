@@ -12,7 +12,7 @@ import urllib.request
 SERVICES = {
     "hermes-action-bridge.service": "http://127.0.0.1:8765/health",
     "hermes-documents.service": "http://127.0.0.1:8766/health",
-    "open-webui.service": "http://127.0.0.1:3000/",
+    "open-webui.service": "http://127.0.0.1:3000/health",
 }
 
 

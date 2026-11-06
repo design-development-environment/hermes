@@ -134,7 +134,10 @@ class FreshOpenWebUIBootstrapTests(unittest.TestCase):
                 sync_openwebui_tool.DB = old_database
             with sqlite3.connect(database) as db:
                 specs = json.loads(db.execute("SELECT specs FROM tool WHERE id='hermes_v4'").fetchone()[0])
-                profiles = db.execute("SELECT name,base_model_id FROM model ORDER BY name").fetchall()
+                profiles = db.execute("SELECT name,base_model_id FROM model WHERE base_model_id IS NOT NULL ORDER BY name").fetchall()
+                hidden_bases = db.execute(
+                    "SELECT id,meta FROM model WHERE id LIKE 'nvidia/nemotron-3%'"
+                ).fetchall()
                 config = dict(db.execute("SELECT key,value FROM config").fetchall())
             self.assertGreaterEqual(len(specs), 100)
             self.assertIn("get_platform_compatibility", {item["name"] for item in specs})
@@ -142,8 +145,18 @@ class FreshOpenWebUIBootstrapTests(unittest.TestCase):
             self.assertEqual(json.loads(config["rag.embedding_model"]), "nvidia/nemotron-3-embed-1b")
             self.assertEqual(json.loads(config["audio.stt.engine"]), "deepgram")
             self.assertEqual(json.loads(config["audio.tts.engine"]), "elevenlabs")
+            self.assertEqual(json.loads(config["ui.default_models"]), "hermes-v4")
+            self.assertEqual(
+                json.loads(config["ui.model_order_list"]),
+                ["hermes-v4", "hermes-cloud-preview", "hermes-gamma"],
+            )
+            self.assertEqual(
+                json.loads(config["ui.default_pinned_models"]),
+                "hermes-v4,hermes-cloud-preview,hermes-gamma",
+            )
+            self.assertEqual(len(hidden_bases), 3)
+            self.assertTrue(all(json.loads(meta)["hidden"] for _, meta in hidden_bases))
             for key in (
-                "ui.default_models", "ui.model_order_list", "ui.default_pinned_models",
                 "ui.default_interface_settings", "ui.prompt_suggestions",
                 "ui.enable_community_sharing", "ui.enable_message_rating",
             ):

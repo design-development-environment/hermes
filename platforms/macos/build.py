@@ -20,12 +20,12 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent
 VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 NUMERIC_VERSION = ".".join((re.match(r"^(\d+)\.(\d+)\.(\d+)", VERSION) or (_ for _ in ()).throw(ValueError(f"Invalid version: {VERSION}"))).groups())
-BUNDLE = ROOT / "Hermes.app"
+BUNDLE = ROOT / "Hermes Setup.app"
 CONTENTS = BUNDLE / "Contents"
 RESOURCES = CONTENTS / "Resources"
 MACOS = CONTENTS / "MacOS"
-PKG = ROOT / f"Hermes-{VERSION}-macOS-Apple-Silicon.pkg"
-DMG = ROOT / f"Hermes-{VERSION}-macOS-Apple-Silicon.dmg"
+PKG = ROOT / "Hermes-setup-macOS-Apple-Silicon.pkg"
+DMG = ROOT / "Hermes-setup-macOS-Apple-Silicon.dmg"
 
 
 def run(*args: str):
@@ -63,9 +63,9 @@ def build_app():
     (RESOURCES / "bootstrap.command").chmod(0o755)
     make_icon()
     info = {
-        "CFBundleName": "Hermes",
-        "CFBundleDisplayName": "Hermes",
-        "CFBundleIdentifier": "com.anshulmiheer.hermes",
+        "CFBundleName": "Hermes Setup",
+        "CFBundleDisplayName": "Hermes Setup",
+        "CFBundleIdentifier": "com.anshulmiheer.hermes.setup",
         "CFBundleVersion": NUMERIC_VERSION.replace(".", "") + "1",
         "CFBundleShortVersionString": VERSION,
         "CFBundlePackageType": "APPL",
@@ -95,12 +95,18 @@ def build_installers():
     if sys.platform != "darwin":
         print("Hermes.app assembled; PKG and DMG require a native macOS runner.")
         return
-    component = ROOT / "Hermes-component.pkg"
+    component = ROOT / "Hermes-setup-component.pkg"
+    user_component = ROOT / "Hermes-user-component.pkg"
     component.unlink(missing_ok=True)
     PKG.unlink(missing_ok=True)
     DMG.unlink(missing_ok=True)
     run("pkgbuild", "--component", str(BUNDLE), "--install-location", "/Applications",
-        "--identifier", "com.anshulmiheer.hermes", "--version", NUMERIC_VERSION, str(component))
+        "--identifier", "com.anshulmiheer.hermes.setup", "--version", NUMERIC_VERSION, str(component))
+    user_app = ROOT / "client/Hermes User.app"
+    if not user_app.is_dir():
+        raise FileNotFoundError("Build Hermes User before the host package")
+    run("pkgbuild", "--component", str(user_app), "--install-location", "/Applications",
+        "--identifier", "com.anshulmiheer.hermes.user", "--version", NUMERIC_VERSION, str(user_component))
     identity = os.environ.get("MACOS_INSTALLER_IDENTITY", "").strip()
     with tempfile.TemporaryDirectory(prefix="hermes-product-") as raw:
         product = Path(raw)
@@ -124,9 +130,11 @@ def build_installers():
   <options customize="never" require-scripts="false" hostArchitectures="arm64"/>
   <welcome file="welcome.html"/>
   <license file="LICENSE"/>
-  <choices-outline><line choice="hermes"/></choices-outline>
-  <choice id="hermes" visible="false"><pkg-ref id="com.anshulmiheer.hermes"/></choice>
-  <pkg-ref id="com.anshulmiheer.hermes" version="{NUMERIC_VERSION}" onConclusion="none">Hermes-component.pkg</pkg-ref>
+  <choices-outline><line choice="setup"/><line choice="user"/></choices-outline>
+  <choice id="setup" visible="false"><pkg-ref id="com.anshulmiheer.hermes.setup"/></choice>
+  <choice id="user" visible="false"><pkg-ref id="com.anshulmiheer.hermes.user"/></choice>
+  <pkg-ref id="com.anshulmiheer.hermes.setup" version="{NUMERIC_VERSION}" onConclusion="none">Hermes-setup-component.pkg</pkg-ref>
+  <pkg-ref id="com.anshulmiheer.hermes.user" version="{NUMERIC_VERSION}" onConclusion="none">Hermes-user-component.pkg</pkg-ref>
 </installer-gui-script>
 ''',
             encoding="utf-8",
@@ -138,9 +146,11 @@ def build_installers():
         command.append(str(PKG))
         run(*command)
     component.unlink()
+    user_component.unlink()
     with tempfile.TemporaryDirectory(prefix="hermes-dmg-") as raw:
         staging = Path(raw)
-        shutil.copytree(BUNDLE, staging / "Hermes.app", symlinks=True)
+        shutil.copytree(BUNDLE, staging / BUNDLE.name, symlinks=True)
+        shutil.copytree(user_app, staging / user_app.name, symlinks=True)
         shutil.copy2(PKG, staging / PKG.name)
         (staging / "Applications").symlink_to("/Applications")
         run("hdiutil", "create", "-volname", f"Hermes {VERSION}", "-srcfolder", str(staging),

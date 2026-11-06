@@ -16,6 +16,12 @@ ROOT = Path(__file__).resolve().parent
 DB = openwebui_data_dir() / "webui.db"
 SOURCE = ROOT / "openwebui_tool.py"
 MODEL_INSTRUCTIONS = ROOT / "model_instructions.txt"
+HERMES_MODEL_IDS = ["hermes-v4", "hermes-cloud-preview", "hermes-gamma"]
+HERMES_BASE_MODELS = [
+    "nvidia/nemotron-3-ultra-550b-a55b",
+    "nvidia/nemotron-3.5-super-vl-120b-a12b",
+    "nvidia/nemotron-3.5-lightning-30b-a3b",
+]
 
 
 def json_object(value):
@@ -283,6 +289,15 @@ def main():
                 "ON CONFLICT(id) DO UPDATE SET base_model_id=excluded.base_model_id,name=excluded.name,params=excluded.params,meta=excluded.meta,updated_at=excluded.updated_at,is_active=1",
                 (model_id, owner_id, base_model, name, json.dumps(profile_params), json.dumps(profile_meta), created_at),
             )
+        # Open WebUI must know the three provider bases so presets can route to
+        # them, but users should choose only the friendly Hermes presets.
+        for base_model in HERMES_BASE_MODELS:
+            db.execute(
+                "INSERT INTO model(id,user_id,base_model_id,name,params,meta,updated_at,created_at,is_active,version_id) "
+                "VALUES(?,?,NULL,?,'{}',?,strftime('%s','now'),strftime('%s','now'),1,NULL) "
+                "ON CONFLICT(id) DO UPDATE SET base_model_id=NULL,meta=excluded.meta,updated_at=excluded.updated_at,is_active=1",
+                (base_model, owner_id, base_model, json.dumps({"hidden": True})),
+            )
         config_updates = {
             "web.search.enable": True,
             "web.search.engine": "duckduckgo",
@@ -305,17 +320,29 @@ def main():
             "audio.tts.engine": "elevenlabs",
         }
         connection_rows = dict(db.execute(
-            "SELECT key,value FROM config WHERE key IN ('openai.api_base_urls','openai.api_keys')"
+            "SELECT key,value FROM config WHERE key IN ('openai.api_base_urls','openai.api_keys','openai.api_configs')"
         ).fetchall())
         try:
             connection_urls = json.loads(connection_rows.get("openai.api_base_urls", "[]"))
             connection_keys = json.loads(connection_rows.get("openai.api_keys", "[]"))
+            connection_configs = json.loads(connection_rows.get("openai.api_configs", "{}"))
+            if not isinstance(connection_configs, dict):
+                connection_configs = {}
             for index, url in enumerate(connection_urls):
-                if str(url).rstrip("/") == "https://integrate.api.nvidia.com/v1" and index < len(connection_keys) and connection_keys[index]:
+                if str(url).rstrip("/") != "https://integrate.api.nvidia.com/v1":
+                    continue
+                provider = dict(connection_configs.get(str(index), {}))
+                provider["enable"] = True
+                provider["model_ids"] = HERMES_BASE_MODELS
+                connection_configs[str(index)] = provider
+                if index < len(connection_keys) and connection_keys[index]:
                     config_updates["rag.openai.api_key"] = connection_keys[index]
-                    break
+            config_updates["openai.api_configs"] = connection_configs
         except (json.JSONDecodeError, TypeError):
             pass
+        config_updates["ui.default_models"] = "hermes-v4"
+        config_updates["ui.model_order_list"] = HERMES_MODEL_IDS
+        config_updates["ui.default_pinned_models"] = ",".join(HERMES_MODEL_IDS)
         for key, value in config_updates.items():
             db.execute(
                 "INSERT INTO config(key,value,updated_at) VALUES(?,?,strftime('%s','now')) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at",
@@ -326,8 +353,7 @@ def main():
         # provider connections, tools, models, accounts, or secrets.
         db.executemany("DELETE FROM config WHERE key=?", [
             (key,) for key in (
-                "ui.default_models", "ui.model_order_list",
-                "ui.default_pinned_models", "ui.prompt_suggestions",
+                "ui.prompt_suggestions",
                 "ui.default_interface_settings", "ui.enable_community_sharing",
                 "ui.enable_message_rating",
             )

@@ -1,2 +1,2 @@
 #!/bin/sh
-exec python3 /opt/hermes-user/hermes_client.py
+exec /opt/hermes-user/runtime/electron /opt/hermes-user/desktop "$@"

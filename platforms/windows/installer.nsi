@@ -17,7 +17,7 @@ Var CodeBox
 Var TailscaleBox
 Var OptionsDialog
 !ifndef PRODUCT_VERSION
-  !define PRODUCT_VERSION "2.0.0-beta.1"
+  !define PRODUCT_VERSION "2.0.0"
 !endif
 !ifndef PRODUCT_VERSION_QUAD
   !define PRODUCT_VERSION_QUAD "2.0.0.1"
@@ -25,7 +25,7 @@ Var OptionsDialog
 Name "Hermes"
 Caption "Install Hermes ${PRODUCT_VERSION}"
 BrandingText "Hermes · Anshul & Miheer"
-OutFile "Hermes-${PRODUCT_VERSION}-Windows-x64-Setup.exe"
+OutFile "Hermes-setup-Windows-x64.exe"
 InstallDir "$LOCALAPPDATA\Programs\Hermes"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
@@ -133,6 +133,8 @@ FunctionEnd
 
 Section "Hermes"
   SetOutPath "$INSTDIR"
+  File "client\Hermes-user-Windows-x64.exe"
+  ExecWait '"$INSTDIR\Hermes-user-Windows-x64.exe" /S'
   File "bootstrap.ps1"
   File "uninstall.ps1"
   File "README-WINDOWS.md"
@@ -173,6 +175,7 @@ Section "Uninstall"
   Delete "$INSTDIR\bootstrap.log"
   Delete "$INSTDIR\README-WINDOWS.md"
   Delete "$INSTDIR\LICENSE"
+  Delete "$INSTDIR\Hermes-user-Windows-x64.exe"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Hermes"

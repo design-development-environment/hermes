@@ -7,4 +7,4 @@ if [ ! -f "$package" ]; then
   echo "Hermes User installer is unavailable for ${arch}." >&2
   exit 1
 fi
-exec pkexec dpkg -i "$package"
+exec pkexec /usr/bin/apt-get install -y --allow-downgrades "$package"

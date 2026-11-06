@@ -12,7 +12,7 @@ from persistent_workflow import persistent_document_workflow
 
 app = FastAPI(
     title="Hermes Restricted Tools",
-    version="2.0.0-beta.1",
+    version="2.0.0",
     description="Restricted document creation tools for Hermes.",
 )
 

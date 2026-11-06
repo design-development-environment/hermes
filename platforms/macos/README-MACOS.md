@@ -1,11 +1,11 @@
-# Hermes 1.0 for macOS
+# Hermes 2.0 for macOS
 
 Hermes provides two native Apple Silicon deliverables for macOS 14 and newer:
 
-- **Hermes-1.1.0-macOS-Apple-Silicon.pkg** — standard Installer package.
-- **Hermes-1.1.0-macOS-Apple-Silicon.dmg** — Finder disk image containing Hermes.app and the PKG.
+- **Hermes-setup-macOS-Apple-Silicon.pkg/.dmg** — Host backend plus Hermes User.
+- **Hermes-user-macOS-Apple-Silicon.pkg/.dmg** — interface-only installer for another device.
 
-The package installs Hermes.app in `/Applications`. First launch prepares the owner-only runtime and opens the same Hermes setup experience used by the other editions.
+The Setup package installs Hermes Setup and Hermes User in `/Applications`. First launch prepares the owner-only runtime and opens the same setup experience used by the other editions.
 
 ## Installation
 
