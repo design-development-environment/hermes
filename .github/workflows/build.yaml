@@ -33,6 +33,7 @@ jobs:
         run: |
           python -m compileall -q core client packaging tools
           python tools/repo_check.py
+          python tools/validate_locks.py
       - name: Run shared regressions
         run: |
           python -m pip install -r core/requirements-hermes.lock httpx2==2.16.0
@@ -64,7 +65,15 @@ jobs:
       - name: Assemble Windows edition
         run: python tools/assemble.py windows dist/windows
       - name: Validate Windows sources
-        run: python -m compileall -q dist/windows
+        run: |
+          python -m compileall -q dist/windows
+          python tools/validate_locks.py
+      - name: Resolve the complete Windows installer lock
+        shell: pwsh
+        run: |
+          python -m venv "$env:RUNNER_TEMP\hermes-lock-audit"
+          & "$env:RUNNER_TEMP\hermes-lock-audit\Scripts\python.exe" -m pip install --upgrade pip
+          & "$env:RUNNER_TEMP\hermes-lock-audit\Scripts\python.exe" -m pip install --dry-run --ignore-installed --require-hashes -r dist/windows/source/requirements-windows.lock
       - name: Run Windows-native regressions
         run: |
           python -m pip install fastapi==0.162.0 aiohttp==3.14.5 httpx2==2.16.0 psutil pywin32 pyperclip plyer Pillow==12.0.0
@@ -131,7 +140,14 @@ jobs:
       - name: Assemble macOS edition
         run: python tools/assemble.py macos dist/macos
       - name: Validate macOS sources
-        run: python -m compileall -q dist/macos
+        run: |
+          python -m compileall -q dist/macos
+          python tools/validate_locks.py
+      - name: Resolve the complete macOS installer lock
+        run: |
+          python -m venv "$RUNNER_TEMP/hermes-lock-audit"
+          "$RUNNER_TEMP/hermes-lock-audit/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/hermes-lock-audit/bin/python" -m pip install --dry-run --ignore-installed --require-hashes -r dist/macos/source/requirements-macos.lock
       - name: Run macOS-native regressions
         run: |
           python -m pip install -r core/requirements-hermes.lock httpx2==2.16.0 pyobjc-framework-Cocoa pyobjc-framework-Quartz pyperclip Pillow==12.0.0

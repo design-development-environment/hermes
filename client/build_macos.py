@@ -38,7 +38,9 @@ def main() -> None:
     env = os.environ.copy()
     env.update(npm_config_arch="arm64", npm_config_platform="darwin")
     shutil.rmtree(ROOT / "node_modules", ignore_errors=True)
-    subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=ROOT, env=env, check=True)
+    # Keep Electron's target variables away from npm 11, which warns that they
+    # are unknown npm settings.  The Electron downloader consumes them below.
+    subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=ROOT, check=True)
     subprocess.run(["node", "node_modules/electron/install.js"], cwd=ROOT, env=env, check=True)
     shutil.rmtree(APP, ignore_errors=True)
     shutil.copytree(ROOT / "node_modules/electron/dist/Electron.app", APP, symlinks=True)

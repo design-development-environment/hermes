@@ -33,7 +33,9 @@ def build(architecture: str, output: Path) -> Path:
         environment["npm_config_arch"] = npm_arch
         environment["npm_config_platform"] = "linux"
         shutil.rmtree(CLIENT / "node_modules", ignore_errors=True)
-        subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=CLIENT, env=environment, check=True)
+        # npm 11 rejects Electron's legacy npm_config_arch/platform keys as
+        # npm settings.  Only Electron's install script needs them.
+        subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=CLIENT, check=True)
         subprocess.run(["node", "node_modules/electron/install.js"], cwd=CLIENT, env=environment, check=True)
         runtime = root / "opt/hermes-user/runtime"
         shutil.copytree(CLIENT / "node_modules/electron/dist", runtime)

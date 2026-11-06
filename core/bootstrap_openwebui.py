@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import sqlite3
+from contextlib import closing
 
 from platform_support import openwebui_data_dir
 
@@ -16,7 +17,7 @@ def readiness() -> dict:
     if not database.is_file():
         return result
     try:
-        with sqlite3.connect(database, timeout=5) as db:
+        with closing(sqlite3.connect(database, timeout=5)) as db, db:
             result["owner_exists"] = db.execute("SELECT 1 FROM user LIMIT 1").fetchone() is not None
     except sqlite3.Error as exc:
         result["error"] = f"{type(exc).__name__}: {exc}"

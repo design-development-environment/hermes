@@ -123,7 +123,7 @@ def create_backup() -> dict:
                 databases.append(snapshot)
         manifest = {
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "version": "2.0.0",
+            "version": "2.0.1",
             "hostname": __import__("platform").node(),
             "git_head": command_output(["git", "-C", str(PROJECT), "rev-parse", "HEAD"]),
             "user_services": command_output(["systemctl", "--user", "is-active", "hermes-action-bridge.service", "hermes-documents.service", "open-webui.service"]),

@@ -1,4 +1,5 @@
 open-webui==0.12.5
+pyjwt[crypto]==2.13.0
 fastapi
 uvicorn
 pillow

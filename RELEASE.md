@@ -1,10 +1,11 @@
 # Release checklist
 
-## Hermes 2.0.0 — official Host and User release
+## Hermes 2.0.1 — installer reliability update
 
-- Adds separate Hermes Setup and Hermes User installers for Linux, Windows, and macOS.
-- Embeds the matching User installer in every Host package.
-- Keeps remote authentication in Open WebUI and transport private through Tailscale.
+- Fixes clean Windows and macOS backend installation in pip hash-checking mode.
+- Validates full native dependency locks before any installer can be released.
+- Closes SQLite handles cleanly and removes deprecated npm build settings.
+- Keeps separate Hermes Setup and Hermes User installers for every platform.
 
 The private repository builds release installers. A successful CI run proves
 that source checks, platform regressions and native packaging passed. Final

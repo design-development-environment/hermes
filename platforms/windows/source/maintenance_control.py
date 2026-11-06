@@ -9,6 +9,7 @@ import sqlite3
 import windows_commands as subprocess
 import urllib.error
 import urllib.request
+from contextlib import closing
 from pathlib import Path
 
 from fastapi import APIRouter
@@ -57,7 +58,7 @@ def get_hermes_health_report():
         models.get("providers", {}).get("nvidia", {}).get("enabled")
         and models.get("providers", {}).get("nvidia", {}).get("api_key_configured")
     )
-    with sqlite3.connect(TASK_DATABASE) as db:
+    with closing(sqlite3.connect(TASK_DATABASE)) as db, db:
         task_counts = dict(db.execute("SELECT status, COUNT(*) FROM tasks GROUP BY status").fetchall())
     disk = shutil.disk_usage(Path.home())
     backups = list_backups()

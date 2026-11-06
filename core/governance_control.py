@@ -7,7 +7,7 @@ import json
 import os
 import shutil
 import sqlite3
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -75,7 +75,7 @@ def action_permitted(method: str, path: str) -> tuple[bool, str]:
 
 def cancel_active_tasks(reason: str) -> int:
     initialize_database()
-    with sqlite3.connect(TASK_DATABASE) as db:
+    with closing(sqlite3.connect(TASK_DATABASE)) as db, db:
         cursor = db.execute(
             "UPDATE tasks SET status='cancelled', error=?, updated_at=? WHERE status IN ('queued','running','paused')",
             (reason[:4000], now()),
@@ -97,7 +97,7 @@ def record(event: str, details: dict):
 def get_security_dashboard():
     initialize_governance()
     initialize_database()
-    with sqlite3.connect(TASK_DATABASE) as db:
+    with closing(sqlite3.connect(TASK_DATABASE)) as db, db:
         task_counts = dict(db.execute("SELECT status, COUNT(*) FROM tasks GROUP BY status").fetchall())
     audit_counts: dict[str, int] = {}
     last_event = None
@@ -154,7 +154,7 @@ def get_integration_status():
     """Report configuration readiness without exposing connection URLs or secrets."""
     configured = 0
     if OPENWEBUI_DB.is_file():
-        with sqlite3.connect(OPENWEBUI_DB) as db:
+        with closing(sqlite3.connect(OPENWEBUI_DB)) as db, db:
             row = db.execute("SELECT value FROM config WHERE key='tool_server.connections'").fetchone()
         if row:
             try:

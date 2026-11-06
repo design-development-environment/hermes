@@ -10,6 +10,7 @@ import re
 import sqlite3
 import tempfile
 import urllib.parse
+from contextlib import closing
 from pathlib import Path
 from platform_support import CONFIG_DIR, openwebui_data_dir
 
@@ -135,7 +136,7 @@ def resolve_vision(provider: str = "", model: str = "") -> dict:
 def _openwebui_api_key(base_url: str) -> str:
     if not OPENWEBUI_DB.is_file():
         return ""
-    with sqlite3.connect(OPENWEBUI_DB, timeout=5) as db:
+    with closing(sqlite3.connect(OPENWEBUI_DB, timeout=5)) as db, db:
         rows = dict(db.execute(
             "SELECT key,value FROM config WHERE key IN ('openai.api_base_urls','openai.api_keys')"
         ).fetchall())

@@ -24,7 +24,9 @@ def main() -> None:
     node = shutil.which("node.exe") or shutil.which("node")
     if not npm or not node:
         raise SystemExit("Node.js and npm are required")
-    subprocess.run([npm, "ci", "--ignore-scripts"], cwd=ROOT, env=env, check=True)
+    # Keep Electron's target variables away from npm 11, which warns that they
+    # are unknown npm settings.  The Electron downloader consumes them below.
+    subprocess.run([npm, "ci", "--ignore-scripts"], cwd=ROOT, check=True)
     subprocess.run([node, "node_modules/electron/install.js"], cwd=ROOT, env=env, check=True)
     makensis = shutil.which("makensis")
     if not makensis:

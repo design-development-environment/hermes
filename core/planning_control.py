@@ -7,7 +7,7 @@ import json
 import os
 import sqlite3
 import uuid
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -122,7 +122,7 @@ def row_to_plan(row: sqlite3.Row):
         "updated_at": row["updated_at"],
     }
     if row["task_id"]:
-        with sqlite3.connect(TASK_DATABASE) as db:
+        with closing(sqlite3.connect(TASK_DATABASE)) as db, db:
             task = db.execute("SELECT status,current_step,error FROM tasks WHERE id=?", (row["task_id"],)).fetchone()
         plan["task"] = dict(zip(("status", "current_step", "error"), task)) if task else None
     return plan

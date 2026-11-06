@@ -7,6 +7,7 @@ import sqlite3
 import sys
 import time
 import types
+from contextlib import closing
 from pathlib import Path
 from platform_support import openwebui_data_dir
 from pydantic import TypeAdapter
@@ -99,7 +100,7 @@ def generated_specs() -> list[dict]:
 def main():
     content = SOURCE.read_text(encoding="utf-8")
     compile(content, str(SOURCE), "exec")
-    with sqlite3.connect(DB, timeout=10) as db:
+    with closing(sqlite3.connect(DB, timeout=10)) as db, db:
         owner = db.execute("SELECT id FROM user ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at LIMIT 1").fetchone()
         if owner is None:
             raise RuntimeError("Open WebUI has no owner yet; create the first account, then run this sync again")

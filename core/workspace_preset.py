@@ -9,6 +9,7 @@ import json
 import re
 import sqlite3
 import time
+from contextlib import closing
 from pathlib import Path
 from platform_support import openwebui_data_dir
 
@@ -24,7 +25,7 @@ def create_preset(preset_id: str, name: str, base_model: str, vision_provider: s
             raise ValueError(f"Invalid {label}")
     if preset_id == TEMPLATE_ID:
         raise ValueError("The canonical Hermes Alpha preset cannot be overwritten")
-    with sqlite3.connect(DATABASE, timeout=10) as db:
+    with closing(sqlite3.connect(DATABASE, timeout=10)) as db, db:
         template = db.execute(
             "SELECT user_id,params,meta FROM model WHERE id=?", (TEMPLATE_ID,)
         ).fetchone()

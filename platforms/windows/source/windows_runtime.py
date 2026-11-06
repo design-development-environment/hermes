@@ -7,6 +7,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from contextlib import closing
 from pathlib import Path
 from platform_support import PROJECT_ROOT, DATA_DIR, CONFIG_DIR, openwebui_data_dir
 
@@ -163,7 +164,7 @@ def verify():
     if not state['owner_exists']: failed.append('owner')
     import sqlite3
     if state['owner_exists']:
-        with sqlite3.connect(openwebui_data_dir()/'webui.db') as db:
+        with closing(sqlite3.connect(openwebui_data_dir()/'webui.db')) as db, db:
             count=db.execute("SELECT count(*) FROM model WHERE id IN ('hermes-v4','hermes-cloud-preview','hermes-gamma')").fetchone()[0]
             specs=json.loads(db.execute("SELECT specs FROM tool WHERE id='hermes_v4'").fetchone()[0])
         print(f'Model presets: {count}/3')

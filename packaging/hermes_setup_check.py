@@ -7,6 +7,7 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from contextlib import closing
 from pathlib import Path
 
 sys.path.insert(0, '/opt/hermes/payload')
@@ -31,7 +32,7 @@ def main():
     db_path = openwebui_data_dir() / 'webui.db'
     if db_path.is_file():
         try:
-            with sqlite3.connect(f'file:{db_path}?mode=ro', uri=True, timeout=5) as db:
+            with closing(sqlite3.connect(f'file:{db_path}?mode=ro', uri=True, timeout=5)) as db, db:
                 checks['Owner account'] = db.execute('SELECT 1 FROM user LIMIT 1').fetchone() is not None
                 models = {row[0] for row in db.execute('SELECT name FROM model')}
                 checks['Alpha, Beta and Gamma presets'] = {'Hermes Alpha', 'Hermes Beta', 'Hermes Gamma'} <= models
