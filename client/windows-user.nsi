@@ -31,13 +31,17 @@ VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}"
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
-!define MUI_FINISHPAGE_RUN "$INSTDIR\runtime\electron.exe"
-!define MUI_FINISHPAGE_RUN_PARAMETERS '"$INSTDIR\app"'
+!define MUI_FINISHPAGE_RUN "Hermes"
+!define MUI_FINISHPAGE_RUN_FUNCTION LaunchHermes
 !define MUI_FINISHPAGE_RUN_TEXT "Open Hermes"
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
+
+Function LaunchHermes
+  Exec '"$INSTDIR\runtime\electron.exe" "$INSTDIR\app"'
+FunctionEnd
 
 Function .onInit
   ${IfNot} ${RunningX64}
