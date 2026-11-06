@@ -1,6 +1,6 @@
 # macOS 1.0 validation
 
-Hermes 1.0.0 is built on an Apple Silicon `macos-15` GitHub Actions runner.
+Hermes 1.1.0 is built on an Apple Silicon `macos-15` GitHub Actions runner.
 The release gate assembles the shared source, runs the macOS port
 regressions, builds and verifies `Hermes.app`, creates native `.pkg` and `.dmg`
 installers, optionally signs and notarizes them, verifies the disk image, and

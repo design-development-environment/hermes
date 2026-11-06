@@ -1,6 +1,6 @@
 # Windows 1.0 validation
 
-Hermes 1.0.0 is built as a native NSIS installer on `windows-2025` in GitHub
+Hermes 1.1.0 is built as a native NSIS installer on `windows-2025` in GitHub
 Actions. The release gate assembles the shared source, runs the Windows port
 regressions, validates the official Python bootstrap signature, compiles the
 installer, optionally signs it, recalculates its SHA-256 digest, and uploads the

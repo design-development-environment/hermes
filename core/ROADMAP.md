@@ -12,7 +12,7 @@ Hermes has two historical numbering tracks. They must not be mixed.
 - V6.1: safety dashboard, emergency stop, resilient plan revision, memory hygiene,
   MCP readiness, and optional encrypted-backup support.
 
-The original development track is complete and ships publicly as **Hermes 1.0.0**.
+The original development track is complete and ships as **Hermes 1.1.0**.
 
 - Hermes Alpha: smarter natural-language intent routing, screen-aware requests,
   concise tool policy, and verify-before-reporting behavior.

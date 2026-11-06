@@ -1,6 +1,5 @@
 """Sync the canonical Hermes Workspace Tool source into Open WebUI."""
 
-import base64
 import importlib.util
 import inspect
 import json
@@ -18,53 +17,14 @@ DB = openwebui_data_dir() / "webui.db"
 SOURCE = ROOT / "openwebui_tool.py"
 MODEL_INSTRUCTIONS = ROOT / "model_instructions.txt"
 
-HERMES_SUGGESTIONS = [
-    {
-        "title": ["See my", "workspace"],
-        "content": "Look at my current desktop, tell me what is open, and briefly summarize what I appear to be working on.",
-    },
-    {
-        "title": ["Check Hermes", "health"],
-        "content": "Run a complete Hermes health check and explain only anything that needs my attention.",
-    },
-    {
-        "title": ["Plan a", "computer task"],
-        "content": "Help me turn my next computer task into a clear plan. Ask only for information that is truly required before acting.",
-    },
-    {
-        "title": ["Continue my", "work"],
-        "content": "Review my recent Hermes goals and tasks, then suggest the single best thing to continue next. Do not take action until I approve it.",
-    },
-]
 
-HERMES_INTERFACE_DEFAULTS = {
-    "landingPageMode": "chat",
-    "chatBubble": False,
-    "widescreenMode": True,
-    "chatHoverPreview": False,
-    "webSearch": "always",
-    "enableMessageQueue": True,
-    "richTextInput": True,
-    "detectArtifacts": True,
-    "autoFollowUps": True,
-    "showChatTitleInTab": True,
-    "showUpdateToast": False,
-    "showChangelog": False,
-}
-
-
-def hermes_model_icon() -> str:
-    """Return the Hermes mark as an Open WebUI-supported model image data URI."""
-    candidates = (
-        ROOT / "branding/icon-dark.png",
-        ROOT / "packaging/branding/icon-dark.png",
-        ROOT.parent / "packaging/branding/icon-dark.png",
-        Path("/usr/share/icons/hicolor/1024x1024/apps/hermes.png"),
-    )
-    for path in candidates:
-        if path.is_file():
-            return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
-    return "/static/favicon.png"
+def json_object(value):
+    """Decode a database JSON object, tolerating empty or legacy bad values."""
+    try:
+        decoded = json.loads(value or "{}")
+    except (json.JSONDecodeError, TypeError):
+        return {}
+    return decoded if isinstance(decoded, dict) else {}
 
 PLAN_STEP_SCHEMA = {
     "type": "object",
@@ -133,7 +93,6 @@ def generated_specs() -> list[dict]:
 def main():
     content = SOURCE.read_text(encoding="utf-8")
     compile(content, str(SOURCE), "exec")
-    profile_image = hermes_model_icon()
     with sqlite3.connect(DB, timeout=10) as db:
         owner = db.execute("SELECT id FROM user ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at LIMIT 1").fetchone()
         if owner is None:
@@ -279,9 +238,7 @@ def main():
         row = db.execute("SELECT user_id,params,meta,created_at FROM model WHERE id=?", ("hermes-v4",)).fetchone()
         if row is None:
             base_meta = {
-                "profile_image_url": profile_image,
                 "description": "Hermes cloud assistant with local computer tools.",
-                "suggestion_prompts": HERMES_SUGGESTIONS,
                 "capabilities": {"web_search": True, "builtin_tools": True},
                 "toolIds": ["hermes_v4"],
             }
@@ -291,11 +248,13 @@ def main():
             )
             row = db.execute("SELECT user_id,params,meta,created_at FROM model WHERE id=?", ("hermes-v4",)).fetchone()
         owner_id, params_json, meta_json, created_at = row
-        params = json.loads(params_json)
+        params = json_object(params_json)
         params["system"] = MODEL_INSTRUCTIONS.read_text(encoding="utf-8").strip()
-        meta = json.loads(meta_json)
-        meta["profile_image_url"] = profile_image
-        meta["suggestion_prompts"] = HERMES_SUGGESTIONS
+        meta = json_object(meta_json)
+        # Preserve Open WebUI's standard visual design. Remove legacy appearance
+        # fields previously written by Hermes while keeping functional metadata.
+        meta.pop("profile_image_url", None)
+        meta.pop("suggestion_prompts", None)
         capabilities = meta.setdefault("capabilities", {})
         capabilities["web_search"] = True
         capabilities["builtin_tools"] = True
@@ -338,13 +297,6 @@ def main():
             "ollama.enable": False,
             "ollama.base_urls": [],
             "ollama.api_configs": {},
-            "ui.default_models": "hermes-v4",
-            "ui.model_order_list": ["hermes-v4", "hermes-cloud-preview", "hermes-gamma"],
-            "ui.default_pinned_models": "hermes-v4,hermes-cloud-preview,hermes-gamma",
-            "ui.prompt_suggestions": HERMES_SUGGESTIONS,
-            "ui.default_interface_settings": HERMES_INTERFACE_DEFAULTS,
-            "ui.enable_community_sharing": False,
-            "ui.enable_message_rating": False,
             "rag.embedding_engine": "openai",
             "rag.embedding_model": "nvidia/nemotron-3-embed-1b",
             "rag.openai.api_base_url": "https://integrate.api.nvidia.com/v1",
@@ -369,6 +321,17 @@ def main():
                 "INSERT INTO config(key,value,updated_at) VALUES(?,?,strftime('%s','now')) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at",
                 (key, json.dumps(value)),
             )
+        # Old releases customized these interface keys. Deleting only those
+        # values lets Open WebUI apply its own defaults without touching chats,
+        # provider connections, tools, models, accounts, or secrets.
+        db.executemany("DELETE FROM config WHERE key=?", [
+            (key,) for key in (
+                "ui.default_models", "ui.model_order_list",
+                "ui.default_pinned_models", "ui.prompt_suggestions",
+                "ui.default_interface_settings", "ui.enable_community_sharing",
+                "ui.enable_message_rating",
+            )
+        ])
     print(f"Hermes Workspace Tool synced: {len(specs)} functions")
 
 

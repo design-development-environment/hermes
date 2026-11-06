@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hermes 1.0 local computer and persistent personal-agent bridge."""
+"""Hermes 1.1 local computer and persistent personal-agent bridge."""
 
 import os
 import json
@@ -46,7 +46,7 @@ async def lifespan(_app):
 app = FastAPI(
     title="Hermes Personal Agent Bridge",
     description="Authenticated Hermes goals, missions, routines, desktop, browser, coding, memory, planning, and safety tools.",
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
 )
 app.include_router(computer_router)
@@ -161,7 +161,7 @@ def health():
     return {
         "status": "ok",
         "service": "Hermes Personal Agent Bridge",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "platform": platform_status(),
     }
 

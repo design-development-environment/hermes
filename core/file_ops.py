@@ -73,10 +73,11 @@ def read_file(path):
 
 
 def write_file(path, content, overwrite, parents):
-    if path.exists() and not overwrite:
+    existed = path.exists()
+    if existed and not overwrite:
         sys.exit(f"File already exists: {path}. Use --overwrite to replace it.")
 
-    if path.exists() and path.is_dir():
+    if existed and path.is_dir():
         sys.exit(f"Cannot write to a directory: {path}")
 
     if not path.parent.exists():
@@ -85,16 +86,17 @@ def write_file(path, content, overwrite, parents):
         else:
             sys.exit(f"Parent directory does not exist: {path.parent}")
 
-    if path.exists():
+    if existed:
         print(f"WARNING: this will replace existing content: {path}")
         answer = input('Type REPLACE to confirm: ')
         if answer != "REPLACE":
             sys.exit("Cancelled.")
 
-    # Exclusive creation prevents a concurrent writer from being overwritten.
-    with path.open('w' if overwrite else 'x', encoding='utf-8') as stream:
+    # A path absent at the safety check must still use exclusive creation even
+    # when --overwrite was supplied. Otherwise a racing creator could lose data.
+    with path.open('w' if existed else 'x', encoding='utf-8') as stream:
         stream.write(content)
-    print(f"{'Updated' if overwrite else 'Created'}: {path}")
+    print(f"{'Updated' if existed else 'Created'}: {path}")
 
 
 def delete_file(path):

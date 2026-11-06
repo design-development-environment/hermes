@@ -16,7 +16,7 @@ SHARED_MODULES = (
     'workflow_engine.py', 'workflows.py', 'workspace_preset.py',
 )
 SHARED_FILES = ('model_instructions.txt',)
-RELEASE_FILES = ('LICENSE', 'VERSION')
+RELEASE_FILES = ('LICENSE', 'VERSION', 'RELEASE_NOTES.md')
 
 
 def assemble(platform: str, destination: Path) -> None:

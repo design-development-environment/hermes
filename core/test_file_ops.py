@@ -28,6 +28,14 @@ class FileOperationTests(unittest.TestCase):
                 file_ops.write_file(path, 'replace', False, True)
             self.assertEqual(path.read_text(), 'keep')
 
+    def test_overwrite_flag_never_overwrites_file_created_after_check(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'existing.txt'
+            path.write_text('keep')
+            with patch.object(Path, 'exists', return_value=False), self.assertRaises(FileExistsError):
+                file_ops.write_file(path, 'replace', True, True)
+            self.assertEqual(path.read_text(), 'keep')
+
     def test_cli_delete_preserves_symlink_target(self):
         with tempfile.TemporaryDirectory() as folder:
             target = Path(folder) / 'target.txt'

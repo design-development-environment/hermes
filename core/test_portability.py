@@ -120,6 +120,12 @@ class FreshOpenWebUIBootstrapTests(unittest.TestCase):
                 db.execute("CREATE TABLE tool(id TEXT PRIMARY KEY,user_id TEXT,name TEXT,content TEXT,specs TEXT,meta TEXT,valves TEXT,updated_at INTEGER,created_at INTEGER,version_id TEXT)")
                 db.execute("CREATE TABLE model(id TEXT PRIMARY KEY,user_id TEXT,base_model_id TEXT,name TEXT,params TEXT,meta TEXT,updated_at INTEGER,created_at INTEGER,is_active BOOLEAN,version_id TEXT)")
                 db.execute("CREATE TABLE config(key TEXT PRIMARY KEY,value TEXT,updated_at INTEGER)")
+                for key in (
+                    "ui.default_models", "ui.model_order_list", "ui.default_pinned_models",
+                    "ui.default_interface_settings", "ui.prompt_suggestions",
+                    "ui.enable_community_sharing", "ui.enable_message_rating",
+                ):
+                    db.execute("INSERT INTO config VALUES(?,?,1)", (key, json.dumps("legacy")))
             old_database = sync_openwebui_tool.DB
             sync_openwebui_tool.DB = database
             try:
@@ -136,13 +142,23 @@ class FreshOpenWebUIBootstrapTests(unittest.TestCase):
             self.assertEqual(json.loads(config["rag.embedding_model"]), "nvidia/nemotron-3-embed-1b")
             self.assertEqual(json.loads(config["audio.stt.engine"]), "deepgram")
             self.assertEqual(json.loads(config["audio.tts.engine"]), "elevenlabs")
-            self.assertEqual(json.loads(config["ui.default_models"]), "hermes-v4")
-            self.assertFalse(json.loads(config["ui.default_interface_settings"])["chatBubble"])
-            self.assertEqual(len(json.loads(config["ui.prompt_suggestions"])), 4)
+            for key in (
+                "ui.default_models", "ui.model_order_list", "ui.default_pinned_models",
+                "ui.default_interface_settings", "ui.prompt_suggestions",
+                "ui.enable_community_sharing", "ui.enable_message_rating",
+            ):
+                self.assertNotIn(key, config)
             with sqlite3.connect(database) as db:
                 profile_meta = json.loads(db.execute("SELECT meta FROM model WHERE id='hermes-v4'").fetchone()[0])
-            self.assertEqual(len(profile_meta["suggestion_prompts"]), 4)
+            self.assertNotIn("profile_image_url", profile_meta)
+            self.assertNotIn("suggestion_prompts", profile_meta)
             self.assertNotIn("rag.openai.api_key", config)
+
+    def test_invalid_legacy_model_json_is_repaired(self):
+        self.assertEqual(sync_openwebui_tool.json_object(None), {})
+        self.assertEqual(sync_openwebui_tool.json_object("not-json"), {})
+        self.assertEqual(sync_openwebui_tool.json_object("[]"), {})
+        self.assertEqual(sync_openwebui_tool.json_object('{"valid": true}'), {"valid": True})
 
 
 if __name__ == "__main__":

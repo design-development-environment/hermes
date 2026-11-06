@@ -187,6 +187,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           path: release-assets
@@ -198,5 +201,5 @@ jobs:
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --title "Hermes ${GITHUB_REF_NAME#v}" --generate-notes --repo "$GITHUB_REPOSITORY"
+            gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --title "Hermes ${GITHUB_REF_NAME#v}" --notes-file RELEASE_NOTES.md --repo "$GITHUB_REPOSITORY"
           fi

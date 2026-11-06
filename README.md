@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-0d0d0d">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-0d0d0d">
   <img alt="Platforms" src="https://img.shields.io/badge/platforms-Linux%20%C2%B7%20Windows%20%C2%B7%20macOS-0d0d0d">
   <img alt="AI" src="https://img.shields.io/badge/AI-cloud-0d0d0d">
 </p>
@@ -75,7 +75,7 @@ Hermes keeps local databases, tokens, logs, backups and provider keys out of sou
 ---
 
 <p align="center">
-  <strong>Hermes 1.0.0</strong><br>
+  <strong>Hermes 1.1.0</strong><br>
   Highly Efficient Real-time Machine for Everyday Support.<br><br>
   Created by Anshul & Miheer
 </p>

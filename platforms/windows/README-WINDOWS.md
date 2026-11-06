@@ -1,6 +1,6 @@
 # Hermes 1.0 for Windows
 
-Hermes ships as **Hermes-1.0.0-Windows-x64-Setup.exe** for 64-bit Windows 10 and Windows 11. The installer is per-user, preserves existing data during upgrades, installs one Start-menu entry, configures startup at sign-in, and provides a guarded uninstaller.
+Hermes ships as **Hermes-1.1.0-Windows-x64-Setup.exe** for 64-bit Windows 10 and Windows 11. The installer is per-user, preserves existing data during upgrades, installs one Start-menu entry, configures startup at sign-in, and provides a guarded uninstaller.
 
 ## Installation
 

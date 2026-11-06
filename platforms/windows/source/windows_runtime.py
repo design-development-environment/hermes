@@ -17,7 +17,6 @@ def environment():
     env=os.environ.copy()
     env.update({'HERMES_ROOT':str(PROJECT_ROOT),'HERMES_DATA_DIR':str(DATA_DIR),'HERMES_CONFIG_DIR':str(CONFIG_DIR),
                 'PIP_CACHE_DIR':str(DATA_DIR/'cache/pip'),'DATA_DIR':str(openwebui_data_dir()),'HERMES_OPENWEBUI_DATA_DIR':str(openwebui_data_dir()),
-                'WEBUI_NAME':'Hermes','DEFAULT_LOCALE':'en-US',
                 'AUDIO_STT_ENGINE':'deepgram','AUDIO_TTS_ENGINE':'elevenlabs','ENABLE_OLLAMA_API':'false','RAG_EMBEDDING_ENGINE':'openai',
                 'RAG_EMBEDDING_MODEL':'nvidia/nemotron-3-embed-1b','RAG_OPENAI_API_BASE_URL':'https://integrate.api.nvidia.com/v1',
                 'WHISPER_MODEL_AUTO_UPDATE':'false','RAG_EMBEDDING_MODEL_AUTO_UPDATE':'false',
