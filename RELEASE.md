@@ -1,15 +1,10 @@
 # Release checklist
 
-## Hermes 1.1.0 — Bug fixes
+## Hermes 2.0.0-beta.1 — Host and User preview
 
-- Restores the unmodified Open WebUI appearance on every platform and removes
-  legacy Hermes interface defaults, model icons and custom conversation starters.
-- Prevents deleting a symbolic link from deleting its target.
-- Prevents a concurrent file creation from being silently overwritten.
-- Repairs empty, malformed or non-object legacy model metadata during upgrades.
-- Bounds the actual bytes read from a file even if it grows after the size check.
-- Compiles assembled Windows and macOS sources in CI before native tests.
-- Cancels superseded branch builds while preserving version-tag release builds.
+- Adds separate Hermes Host and Hermes User installers for Debian-family Linux.
+- Embeds the matching User installer in every Host package.
+- Keeps remote authentication in Open WebUI and transport private through Tailscale.
 
 The private repository builds release installers. A successful CI run proves
 that source checks, platform regressions and native packaging passed. Final

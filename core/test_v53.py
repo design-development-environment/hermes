@@ -181,7 +181,7 @@ class BackupTests(unittest.TestCase):
             self.assertIn("data/chroma.sqlite3", archive.namelist())
             self.assertIn("private/private.env", archive.namelist())
             manifest = json.loads(archive.read("manifest.json"))
-            self.assertEqual(manifest["version"], "1.1.0")
+            self.assertEqual(manifest["version"], "2.0.0-beta.1")
 
 
 if __name__ == "__main__":

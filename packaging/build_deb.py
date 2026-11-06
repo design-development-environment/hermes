@@ -8,6 +8,7 @@ import platform
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -49,7 +50,7 @@ def copy(source: Path, dest: Path, mode: int = 0o644):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--output', type=Path, default=DESKTOP / 'Hermes-installer.deb')
+    parser.add_argument('--output', type=Path, default=DESKTOP / 'Hermes-Host-installer.deb')
     parser.add_argument('--architecture', choices=('amd64', 'arm64'), default={'x86_64': 'amd64', 'aarch64': 'arm64'}.get(platform.machine(), 'amd64'))
     args = parser.parse_args()
     output = args.output.expanduser().resolve()
@@ -57,6 +58,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix='hermes-deb-', dir=output.parent) as folder:
         root = Path(folder) / 'package'
         payload = root / 'opt/hermes/payload'
+        client_package = root / 'opt/hermes/client-installer' / f'Hermes-User-{VERSION}-Linux-{args.architecture}.deb'
+        subprocess.run([sys.executable, str(PACKAGING / 'build_user_deb.py'), '--architecture', args.architecture, '--output', str(client_package)], check=True)
         for name in FILES:
             copy(SOURCE / name, payload / name, 0o755 if name == 'install.sh' else 0o644)
         copy(PACKAGING / 'hermes_setup.py', root / 'usr/bin/hermes-setup', 0o755)
@@ -64,6 +67,7 @@ def main():
         copy(PACKAGING / 'hermes-open', root / 'usr/bin/hermes-open', 0o755)
         copy(PACKAGING / 'askpass.sh', root / 'opt/hermes/askpass.sh', 0o755)
         copy(PACKAGING / 'hermes-autologin', root / 'opt/hermes/hermes-autologin', 0o755)
+        copy(PACKAGING / 'hermes-user-install', root / 'usr/bin/hermes-user-install', 0o755)
         for name in ('hermes.desktop',):
             copy(PACKAGING / name, root / 'usr/share/applications' / name)
         copy(PACKAGING / 'branding/icon-dark.png', root / 'usr/share/icons/hicolor/1024x1024/apps/hermes.png')
@@ -74,22 +78,22 @@ def main():
             copy(PACKAGING / f'logo-{theme}.png', root / 'usr/share/hermes/branding' / f'logo-{theme}.png')
         control = root / 'DEBIAN/control'
         control.parent.mkdir(parents=True)
-        control.write_text('''Package: hermes-installer
+        control.write_text('''Package: hermes-host
 Version: {version}
 Section: utils
 Priority: optional
 Architecture: {architecture}
 Maintainer: Anshul & Miheer <anshul.pandhare@mitwpu.edu.in>
 Depends: python3, python3-tk, python3-pil, python3-pil.imagetk, fonts-inter, zenity, sudo, xdg-utils, bash, ca-certificates
-Description: Hermes graphical setup
+Description: Hermes Host graphical setup
  Highly Efficient Real-time Machine for Everyday Support.
  Installs the Hermes cloud assistant and guides first-run configuration.
 Support: anshul.pandhare@mitwpu.edu.in, miheer.sabnis@mitwpu.edu.in
 '''.format(architecture=args.architecture, version=VERSION))
-        copyright_file = root / 'usr/share/doc/hermes-installer/copyright'
+        copyright_file = root / 'usr/share/doc/hermes-host/copyright'
         copyright_file.parent.mkdir(parents=True, exist_ok=True)
         copyright_file.write_text('Copyright: Anshul & Miheer\nLicense: All rights reserved.\n')
-        built = Path(folder) / 'Hermes-installer.deb'
+        built = Path(folder) / 'Hermes-Host-installer.deb'
         subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(root), str(built)], check=True)
         os.replace(built, output)
     print(output)

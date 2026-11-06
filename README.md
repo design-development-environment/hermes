@@ -2,6 +2,14 @@
   <img src="packaging/branding/hermes-dark.svg" alt="Hermes" width="280">
 </p>
 
+## 2.0 beta: Host and User
+
+Hermes now has a **Host** installer for the computer it controls and a
+lightweight **User** installer for remote computers. The User app connects
+only through Tailscale and opens the ordinary Open WebUI login; it never holds
+your model keys, computer-control token, chats or Host data. See
+[the Host and User guide](HOST_USER.md).
+
 <h1 align="center">Your computer. Ready to help.</h1>
 
 <p align="center">
@@ -9,7 +17,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-0d0d0d">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0--beta.1-0d0d0d">
   <img alt="Platforms" src="https://img.shields.io/badge/platforms-Linux%20%C2%B7%20Windows%20%C2%B7%20macOS-0d0d0d">
   <img alt="AI" src="https://img.shields.io/badge/AI-cloud-0d0d0d">
 </p>
@@ -75,7 +83,7 @@ Hermes keeps local databases, tokens, logs, backups and provider keys out of sou
 ---
 
 <p align="center">
-  <strong>Hermes 1.1.0</strong><br>
+  <strong>Hermes 2.0.0-beta.1</strong><br>
   Highly Efficient Real-time Machine for Everyday Support.<br><br>
   Created by Anshul & Miheer
 </p>

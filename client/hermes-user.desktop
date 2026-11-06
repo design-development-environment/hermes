@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Hermes User
+Comment=Connect securely to a Hermes Host
+Exec=hermes-user
+Icon=hermes
+Terminal=false
+Categories=Utility;Network;

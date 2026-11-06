@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+arch="$(dpkg --print-architecture)"
+version="$(dpkg-query -W -f='${Version}' hermes-host 2>/dev/null || true)"
+package="/opt/hermes/client-installer/Hermes-User-${version}-Linux-${arch}.deb"
+if [ ! -f "$package" ]; then
+  echo "Hermes User installer is unavailable for ${arch}." >&2
+  exit 1
+fi
+exec pkexec dpkg -i "$package"

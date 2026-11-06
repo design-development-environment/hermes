@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw, ImageTk
 PAYLOAD = Path('/opt/hermes/payload')
 ROOT = Path.home() / 'hermes-v4'
 ASKPASS = '/opt/hermes/askpass.sh'
-VERSION = '1.1.0'
+VERSION = '2.0.0-beta.1'
 
 
 class SummaryCard(tk.Canvas):
@@ -474,6 +474,8 @@ class Setup(tk.Tk):
         self.marker.parent.mkdir(parents=True, exist_ok=True)
         self.marker.write_text('Verified installation\n')
         self.go(6)
+        if Path('/usr/bin/hermes-user-install').is_file():
+            self.after(400, lambda: subprocess.Popen(['/usr/bin/hermes-user-install']))
 
     def advance(self):
         if self.step == 0:
@@ -499,7 +501,7 @@ class Setup(tk.Tk):
             ('Cloud accounts', 'In Open WebUI Admin Settings → Connections, add an OpenAI-compatible connection using https://integrate.api.nvidia.com/v1, Bearer authentication, your NVIDIA key, and Chat Completions. In Audio settings, add Deepgram for speech recognition and ElevenLabs for spoken replies if wanted. Test a chat with each Hermes model before continuing.', 'Continue'),
             ('Remote access and startup', 'Connect Tailscale using the button below and approve its sign-in link. Then enable Tailscale Serve. Choose whether the desktop logs in automatically at boot.', 'Apply startup choice'),
             ('Final check', 'This rechecks this machine. Test a chat, file read, browser action, screenshot, voice and phone access in Open WebUI before relying on Hermes remotely.', 'Run check'),
-            ('Hermes is installed', 'Hermes services are set to start at boot. Open the Hermes shortcut to use it. Log into Tailscale on your phone to access its Tailscale address. Desktop control requires an active unlocked desktop session.', 'Finish'),
+            ('Hermes Host is installed', 'Hermes services are set to start at boot. The matching Hermes User installer has opened for this computer. Install Hermes User on another Tailscale-connected computer to access this Host, then sign in through Open WebUI. Desktop control requires an active unlocked desktop session.', 'Open Hermes'),
         ]
         title, body, button = pages[self.step]
         self.toolbar_title.configure(text=f'Hermes Installer   ·   {self.step+1} of 7')

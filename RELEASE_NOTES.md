@@ -1,21 +1,22 @@
-# Hermes 1.1.0 — Bug fixes
+# Hermes 2.0.0-beta.1 — Host and User preview
 
-Hermes 1.1.0 is a reliability release for Linux, Windows and macOS.
+This preview introduces the split Hermes architecture.
 
-## Fixed
+## Included
 
-- Restored Open WebUI's original interface by removing Hermes-specific UI
-  defaults, custom model artwork and conversation starters.
-- Fixed symbolic-link deletion so Hermes removes the link, never its target.
-- Fixed concurrent file creation so a newly created file cannot be silently
-  overwritten, including when `overwrite` was requested before the race.
-- Fixed large-file reads so the actual bytes read remain bounded if a file grows
-  after its initial size check.
-- Fixed upgrades from empty, malformed or non-object legacy model metadata.
-- Fixed release validation gaps by compiling the assembled Windows and macOS
-  sources before native tests.
-- Fixed wasted CI work by cancelling superseded branch builds while preserving
-  every version-tag release build.
+- **Hermes Host** installs the backend, Open WebUI, local tools, Tailscale and
+  automatic services.
+- **Hermes User** is a separate lightweight remote interface. It stores only a
+  Host Tailscale address and opens the normal Open WebUI sign-in page.
+- The Host package embeds the matching Hermes User installer and starts it
+  after Host verification.
+- No provider API keys, computer-control token, chat database, or Open WebUI
+  password is copied to a User device.
 
-Existing chats, accounts, API keys, provider connections, tools, model presets
-and local data are preserved during the upgrade.
+## Beta limits
+
+- The split Host/User Debian installers are the supported preview path.
+- Windows and macOS continue to ship the complete Host edition in this beta;
+  their dedicated User installers are the next compatibility milestone.
+- The Host must be online, signed into Tailscale, and configured with
+  Tailscale Serve before a User device can connect.

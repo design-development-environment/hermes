@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import re
 from pathlib import Path
 
 from PIL import Image
@@ -18,6 +19,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent
 VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+NUMERIC_VERSION = ".".join((re.match(r"^(\d+)\.(\d+)\.(\d+)", VERSION) or (_ for _ in ()).throw(ValueError(f"Invalid version: {VERSION}"))).groups())
 BUNDLE = ROOT / "Hermes.app"
 CONTENTS = BUNDLE / "Contents"
 RESOURCES = CONTENTS / "Resources"
@@ -64,7 +66,7 @@ def build_app():
         "CFBundleName": "Hermes",
         "CFBundleDisplayName": "Hermes",
         "CFBundleIdentifier": "com.anshulmiheer.hermes",
-        "CFBundleVersion": VERSION.replace(".", ""),
+        "CFBundleVersion": NUMERIC_VERSION.replace(".", "") + "1",
         "CFBundleShortVersionString": VERSION,
         "CFBundlePackageType": "APPL",
         "CFBundleExecutable": "Hermes",
@@ -98,7 +100,7 @@ def build_installers():
     PKG.unlink(missing_ok=True)
     DMG.unlink(missing_ok=True)
     run("pkgbuild", "--component", str(BUNDLE), "--install-location", "/Applications",
-        "--identifier", "com.anshulmiheer.hermes", "--version", VERSION, str(component))
+        "--identifier", "com.anshulmiheer.hermes", "--version", NUMERIC_VERSION, str(component))
     identity = os.environ.get("MACOS_INSTALLER_IDENTITY", "").strip()
     with tempfile.TemporaryDirectory(prefix="hermes-product-") as raw:
         product = Path(raw)
@@ -124,7 +126,7 @@ def build_installers():
   <license file="LICENSE"/>
   <choices-outline><line choice="hermes"/></choices-outline>
   <choice id="hermes" visible="false"><pkg-ref id="com.anshulmiheer.hermes"/></choice>
-  <pkg-ref id="com.anshulmiheer.hermes" version="{VERSION}" onConclusion="none">Hermes-component.pkg</pkg-ref>
+  <pkg-ref id="com.anshulmiheer.hermes" version="{NUMERIC_VERSION}" onConclusion="none">Hermes-component.pkg</pkg-ref>
 </installer-gui-script>
 ''',
             encoding="utf-8",
